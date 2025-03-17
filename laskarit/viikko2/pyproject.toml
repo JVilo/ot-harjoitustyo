@@ -1,0 +1,21 @@
+[project]
+name = "viikko2"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "JVilo",email = "vilo.johanna@gmail.com"}
+]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+coverage = "^7.7.0"
+
