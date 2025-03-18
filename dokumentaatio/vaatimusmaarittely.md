@@ -11,7 +11,7 @@ Aluksi sovelluksessa tulee ainoastaan olemaan _tavallisia käyttäjiä_. Myöhem
 ## Käyttöliittymäluonnos
 Sovelluksessa tulee olemaan kolme näkymää.
 
-![](/home/hanska/Downloads/20250318_110637.jpg)
+![alt text](image.png)
 
 Sovellus aukeaa kirjautumisnäkymään, josta voi mennä luomaan uuden käyttäjän _luo uusi_ -näkymään tai sisäänkirjautumisen jälkeen käyttäjännäkymään.
 
