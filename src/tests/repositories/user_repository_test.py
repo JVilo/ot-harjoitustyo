@@ -13,4 +13,4 @@ class TestUserRepository(unittest.TestCase):
         users = user_repository.find_all()
 
         self.assertEqual(len(users), 1)
-        self.assertEqual(users[0].username, self.user_eva.usernaem)
+        self.assertEqual(str(users[0]), str(self.user_eva))
