@@ -10,7 +10,7 @@ class InvalidCredentialsError(Exception):
 class UsernameExistsError(Exception):
     pass
 
-class PasswordsDoNotMach(Exception):
+class PasswordsDoNotMatch(Exception):
     pass
 
 class PefService:
@@ -55,7 +55,7 @@ class PefService:
             raise UsernameExistsError(f"Username {username} already exists")
         
         elif password != password2:
-            raise PasswordsDoNotMach(f'Passwords do not match')
+            raise PasswordsDoNotMatch(f'Passwords do not match')
 
         user = self._user_repository.create(User(username, password))
 
