@@ -11,7 +11,7 @@ Aluksi sovelluksessa tulee ainoastaan olemaan _tavallisia käyttäjiä_. Myöhem
 ## Käyttöliittymäluonnos
 Sovelluksessa tulee olemaan kolme näkymää.
 
-![alt text](image.png)
+![alt text](./kuvat/image.png)
 
 Sovellus aukeaa kirjautumisnäkymään, josta voi mennä luomaan uuden käyttäjän _luo uusi_ -näkymään tai sisäänkirjautumisen jälkeen käyttäjännäkymään.
 
