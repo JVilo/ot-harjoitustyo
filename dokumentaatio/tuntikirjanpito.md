@@ -13,9 +13,11 @@
 | 25.3. | 0.5  | Kommentejen lisääminen työhön. |
 |       | 0.5  | Lisää testin soimintaan saattamista. |
 |       |  1   | käyttöliittymä aukeaa myös kirjautumis ja käyttäjän luomis ikkunaan |
-| 27.3. | 0.5  | .git ignore tiedoston lisääminen. |
+| 27.3. | 0.5  | .gitignore tiedoston lisääminen. |
 |       | 0.5  | Coveragen lisääminen työhön. |
 |       | 0.25 | changelog dokumentin aloittaminen. |
 |       | 0.25 | Repositorion siistiminen. |
 |       | 0.25 | Invokelle tasks.py tehtävän lisääminen, uusien testejen tekeminen. |
 |       | 0.25 | Readme tiedoston muokkaaminen. |
+|       |  1   | pfe-laskurin luokkien ja sovelluslogiikan rakentamisen aloittaminen. |
+|       |  1   | Käyttöliittymän siaäänkirjautuneen näkymä. |
