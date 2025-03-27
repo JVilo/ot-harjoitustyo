@@ -3,9 +3,10 @@
 htmlcov
 __pycache__/
 *.py[cod]
+.venv
 
 
-data/database.sqlite
-data/pef.csv
-data/test-database.sqlite
-data/test-pef.csv
+database.sqlite
+pef.csv
+test-database.sqlite
+test-pef.csv
