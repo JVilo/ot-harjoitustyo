@@ -1,0 +1,11 @@
+.coverage
+.pytest_cache
+htmlcov
+__pycache__/
+*.py[cod]
+
+
+data/database.sqlite
+data/pef.csv
+data/test-database.sqlite
+data/test-pef.csv
