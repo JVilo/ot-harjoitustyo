@@ -21,3 +21,5 @@
 |       | 0.25 | Readme tiedoston muokkaaminen. |
 |       |  1   | pfe-laskurin luokkien ja sovelluslogiikan rakentamisen aloittaminen. |
 |       |  1   | Käyttöliittymän siaäänkirjautuneen näkymä. |
+| 1.4.  |0.125 | changelog dokumentin tekstin korjaus. |
+|       |      | Testin tekeminen pef_repositorylle. |
