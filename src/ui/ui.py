@@ -1,7 +1,7 @@
 import tkinter as tk
 from ui.login_view import LoginView
 from ui.create_user_view import CreateUserView
-from ui.pef_view import PefListView  # Import the PefListView for PEFR calculation
+from ui.pef_view import PefListView  # Import the PefListView for PEF calculation
 
 class UI:
     """Main UI controller that handles switching between different views."""
@@ -15,7 +15,7 @@ class UI:
         # Placeholder function for handling login (this is where the user successfully logs in)
         print("Login handler called")
         
-        # Once the user logs in successfully, show the PEFR calculation view
+        # Once the user logs in successfully, show the PEF calculation view
         self._show_pef_view()
 
     def handle_create_user(self):
@@ -61,13 +61,13 @@ class UI:
         self._current_view.pack()  # Packs the create user view to display it
 
     def _show_pef_view(self):
-        # Switches to the PEFR calculation view after login
+        # Switches to the PEF calculation view after login
         self._hide_current_view()
 
-        # Create an instance of PefListView for PEFR calculation
+        # Create an instance of PefListView for PEF calculation
         self._current_view = PefListView(self._root)
 
-        self._current_view.pack()  # Packs the PEFR calculation view to display it
+        self._current_view.pack()  # Packs the PEF calculation view to display it
 
     def run(self):
         # Runs the application and initializes the Tkinter root window

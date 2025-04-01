@@ -1,4 +1,3 @@
-from pathlib import Path
 from entities.pef import Pef
 from repositories.user_repository import user_repository
 from config import PEF_FILE_PATH
@@ -60,7 +59,7 @@ class PefRepository:
         return pefs
     
     def _write(self, pefs):
-        """Writes the PEFR records to the file."""
+        """Writes the PEF records to the file."""
         with open(self._file_path, "w", encoding="utf-8") as file:
             for pef in pefs:
                 user_id = pef.user.id if pef.user else ""

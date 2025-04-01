@@ -96,7 +96,7 @@ class PefListView:
         )
         self._error_label.grid(padx=5, pady=5)
 
-        self._reference_pef_var = StringVar(self._frame)  # Variable for reference PEFR value
+        self._reference_pef_var = StringVar(self._frame)  # Variable for reference PEF value
         reference_pef_label = ttk.Label(
             master=self._frame,
             textvariable=self._reference_pef_var
