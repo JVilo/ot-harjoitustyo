@@ -1,5 +1,5 @@
 from tkinter import Tk
-from ui.ui import UI
+from src.ui.ui import UI
 
 
 def main():

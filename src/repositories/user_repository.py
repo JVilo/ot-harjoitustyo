@@ -1,5 +1,5 @@
-from entities.user import User
-from database_connection import get_database_connection
+from src.entities.user import User
+from src.database_connection import get_database_connection
 
 
 def get_user_by_row(row):
@@ -9,7 +9,7 @@ class UserRepository:
 
     def __init__(self, connection):
         self._connection = connection
-    
+
     def find_all(self):
         # Fetches all users as a list
         cursor = self._connection.cursor()
@@ -24,6 +24,17 @@ class UserRepository:
         cursor.execute(
             "select * from users where username = ?",
             (username,)
+        )
+        row = cursor.fetchone()
+
+        return get_user_by_row(row)
+
+    def find_by_id(self, user_id):
+        # Returns the user with the specified id
+        cursor = self._connection.cursor()
+        cursor.execute(
+            "select * from users where id = ?",
+            (user_id,)
         )
         row = cursor.fetchone()
 

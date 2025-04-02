@@ -1,10 +1,10 @@
-from entities.user import User
-from entities.pef import Pef
+from src.entities.user import User
+from src.entities.pef import Pef
 
-from repositories.pef_repository import (
+from src.repositories.pef_repository import (
     pef_repository as default_pef_repository
 )
-from repositories.user_repository import (
+from src.repositories.user_repository import (
     user_repository as default_user_repository
 )
 
@@ -24,11 +24,10 @@ class PefService:
         pef_repository=default_pef_repository,
         user_repository=default_user_repository
     ):
-    
+
         self._user = None
         self._pef_repository = pef_repository
         self._user_repository = user_repository
-
 
     def create_pef(self, value, user=None):
         pef = Pef(value=value, user=user)
@@ -74,9 +73,9 @@ class PefService:
 
         if existing_user:
             raise UsernameExistsError(f"Username {username} already exists")
-        
-        elif password != password2:
-            raise PasswordsDoNotMatch(f'Passwords do not match')
+
+        if password != password2:
+            raise PasswordsDoNotMatch('Passwords do not match')
 
         user = self._user_repository.create(User(username, password))
 
