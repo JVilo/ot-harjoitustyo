@@ -67,12 +67,12 @@ class PefListView:
         
         if isinstance(reference_pef, list):  # Check if reference_pef is a list
             if reference_pef:
-                reference_pef = reference_pef[0]  # Use the first element if it's a list
+                reference_pef = reference_pef[-1]  # Use the first element if it's a list
             else:
                 reference_pef = None  # Handle empty list
 
         if reference_pef is not None:
-            self._reference_pef_var.set(f"PEF viitearvosi: {reference_pef:.2f} L/min")
+            self._reference_pef_var.set(f"PEF viitearvosi: {reference_pef.value:.2f} L/min")
         else:
             self._reference_pef_var.set("No reference PEF value found.")
 

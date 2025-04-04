@@ -46,7 +46,7 @@ class PefService:
 
         """Fetches the stored reference PEF value for the given user."""
         ref= self._pef_repository.get_latest_for_user(self._user.username)
-        #ref = filter(lambda ref: ref)
+        #print(f"Fetched reference PEF for {self._user.username}: {ref}")
         return list(ref)
 
     def get_user_pef(self):
@@ -73,6 +73,7 @@ class PefService:
 
         ref_pef = Pef(value=reference_pef, user=self._user)
         self._pef_repository.create(ref_pef)
+        #print(f"Saving reference PEF: {reference_pef} for user: {user.username}")
         return reference_pef
 
     def login(self, username, password):

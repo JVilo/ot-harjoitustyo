@@ -32,6 +32,8 @@ class LoginView:
         try:
             pef_service.login(username, password)
             self._handle_login()
+            user = pef_service.login(username, password)
+            pef_service._user = user
         except InvalidCredentialsError:
             self._show_error("Invalid username or password")
 

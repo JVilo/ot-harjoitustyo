@@ -57,11 +57,8 @@ class PefRepository:
 
     def get_latest_for_user(self, username):
         ref = self.find_all()
-        # Ensure ref.user is not None before accessing its username
-        user_ref = filter(
-            lambda ref: ref.user and ref.user.username == username, ref)
-        print(list(user_ref))  # convert filter to list to actually see the filtered items
-        return list(user_ref)
+
+        return [pef for pef in ref if pef.user and pef.user.username == username]  # Adjust based on your actual repository code
 
     def _ensure_file_exists(self):
         """Ensures the file exists."""
