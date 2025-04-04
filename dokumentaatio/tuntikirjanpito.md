@@ -27,3 +27,5 @@
 | 3.4.  |  2   | Käyttäjän näkymän muuttaminen niin että referensiarvon voi laskea nappia painamalla. |
 | 4.4.  | 0.5  | Lintin ongelman korjaaminen niin että importeista ei tule erroria. |
 |       |  4   | Referenssi arvon tallentaminen ja tuominen käyttäjälle jos se on jo laskettu. |
+| 5.4.  | 1.5  | Käytäjä voi nyt tarkistella yksittäiten päivä mittausten erotusta sekä ennen etää lääkkeen oton jälkeen. |
+
