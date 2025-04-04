@@ -87,6 +87,57 @@ class PefService:
         self._user = user
 
         return user
+    #the ui for this -->
+    def calculate_percentage_difference(self, before_pef, after_pef):
+        """Calculates the percentage difference between before and after PEF values."""
+        if before_pef == 0:
+            return 0  # Handle division by zero
+        return ((after_pef - before_pef) / before_pef) * 100
+
+    def get_warning_message(self, morning_evening_diff, morning_before_after_diff, evening_before_after_diff):
+        """Returns a warning message if any of the PEF differences exceed the threshold values."""
+        
+        # Check if the values are not None before comparing them
+        if morning_evening_diff is not None and (morning_evening_diff > 20 or morning_evening_diff > 60):
+            return "PEF ero aamun ja illan välillä on yli 20% tai 60 L/min!"
+        elif morning_before_after_diff is not None and (morning_before_after_diff > 15 or morning_before_after_diff > 60):
+            return "PEF ero aamun ennen ja jälkeen lääkkeen on yli 15% tai 60 L/min!"
+        elif evening_before_after_diff is not None and (evening_before_after_diff > 15 or evening_before_after_diff > 60):
+            return "PEF ero illan ennen ja jälkeen lääkkeen on yli 15% tai 60 L/min!"
+        else:
+            return ""
+
+    def calculate_pef_differences(self, morning_before, morning_after, evening_before, evening_after):
+        """Calculates the percentage differences for morning/evening and before/after PEF with optional bronchodilation."""
+    
+        # Calculate morning/evening PEF difference (regardless of bronchodilation)
+        morning_evening_diff = None
+        if morning_before is not None and evening_before is not None:
+            morning_evening_diff = self.calculate_percentage_difference(morning_before, evening_before)
+
+        # Initialize the before/after differences
+        before_after_diff_morning = None
+        before_after_diff_evening = None
+        
+        # Only calculate the before/after differences if bronchodilation values are provided
+        if morning_before is not None and morning_after is not None:
+            before_after_diff_morning = self.calculate_percentage_difference(morning_before, morning_after)
+        
+        if evening_before is not None and evening_after is not None:
+            before_after_diff_evening = self.calculate_percentage_difference(evening_before, evening_after)
+
+        # Get the warning message based on the differences calculated
+        warning_message = self.get_warning_message(
+            morning_evening_diff, before_after_diff_morning or 0, before_after_diff_evening or 0
+        )
+
+        return {
+            "morning_evening_diff": morning_evening_diff,
+            "before_after_diff_morning": before_after_diff_morning,
+            "before_after_diff_evening": before_after_diff_evening,
+            "warning_message": warning_message
+        }
+    # <--- is not done yet.
 
     def get_current_user(self):
         # returns the current logged-in user, or None if not logged in

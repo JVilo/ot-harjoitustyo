@@ -10,6 +10,13 @@ class PefListView:
         self._gender_var = None
         self._error_variable = None
         self._error_label = None
+        self._morning_before_var = None
+        self._morning_after_var = None
+        self._evening_before_var = None
+        self._evening_after_var = None
+        self._calculate_comparison_button = None
+        self._comparison_result_var = None
+        self._comparison_result_label = None
         self._reference_pef_var = None
         self._calculate_button = None
         self._logged_in_user = logged_in_user  # Store the logged-in user
@@ -243,6 +250,146 @@ class PefListView:
         else:
             self._calculate_button.config(state=constants.DISABLED)  # Keep it disabled if fields are empty
 
+    def _initialize_comparison_button(self):
+        """Initializes the 'Laske vertailu' button to start the comparison."""
+        self._calculate_comparison_button = ttk.Button(
+            master=self._frame,
+            text="Laske vertailu",
+            command=self._toggle_comparison_fields
+        )
+        self._calculate_comparison_button.grid(padx=5, pady=5, sticky=constants.EW)
+
+    def _toggle_comparison_fields(self):
+        """Shows or hides the fields for morning/evening PEF values and handles calculation."""
+        if not self.fields_initialized:
+            # Initialize fields for comparison
+            self._initialize_comparison_fields()
+            self._calculate_comparison_button.config(text="Sulje vertailu")
+        else:
+            # Hide the comparison fields
+            self._hide_comparison_fields()
+            self._calculate_comparison_button.config(text="Laske vertailu")
+
+    def _initialize_comparison_fields(self):
+        """Initialize the fields for entering morning and evening PEF values."""
+        # Initialize PEF input variables
+        self._morning_before_var = StringVar(self._frame)
+        self._morning_after_var = StringVar(self._frame)
+        self._evening_before_var = StringVar(self._frame)
+        self._evening_after_var = StringVar(self._frame)
+
+        # Create labels for the input fields
+        self._morning_before_label = ttk.Label(master=self._frame, text="Aamun PEF ennen lääkettä (L/min)")
+        self._morning_after_label = ttk.Label(master=self._frame, text="Aamun PEF jälkeen lääkettä (L/min)")
+        self._evening_before_label = ttk.Label(master=self._frame, text="Illan PEF ennen lääkettä (L/min)")
+        self._evening_after_label = ttk.Label(master=self._frame, text="Illan PEF jälkeen lääkettä (L/min)")
+
+        # Create entry fields for the PEF values
+        self._morning_before_entry = ttk.Entry(master=self._frame, textvariable=self._morning_before_var)
+        self._morning_after_entry = ttk.Entry(master=self._frame, textvariable=self._morning_after_var)
+        self._evening_before_entry = ttk.Entry(master=self._frame, textvariable=self._evening_before_var)
+        self._evening_after_entry = ttk.Entry(master=self._frame, textvariable=self._evening_after_var)
+
+        # Grid the labels and entry fields
+        self._morning_before_label.grid(padx=5, pady=5, sticky=constants.W)
+        self._morning_before_entry.grid(padx=5, pady=5, sticky=constants.EW)
+
+        self._morning_after_label.grid(padx=5, pady=5, sticky=constants.W)
+        self._morning_after_entry.grid(padx=5, pady=5, sticky=constants.EW)
+
+        self._evening_before_label.grid(padx=5, pady=5, sticky=constants.W)
+        self._evening_before_entry.grid(padx=5, pady=5, sticky=constants.EW)
+
+        self._evening_after_label.grid(padx=5, pady=5, sticky=constants.W)
+        self._evening_after_entry.grid(padx=5, pady=5, sticky=constants.EW)
+
+        # Create the "Calculate" button
+        self._calculate_button = ttk.Button(
+            master=self._frame,
+            text="Laske",
+            command=self._calculate_comparison
+        )
+        self._calculate_button.grid(padx=5, pady=5, sticky=constants.EW)
+
+        # Create the result label to display comparison results
+        self._comparison_result_var = StringVar(self._frame)
+        self._comparison_result_label = ttk.Label(
+            master=self._frame,
+            textvariable=self._comparison_result_var,
+            foreground="green"
+        )
+        self._comparison_result_label.grid(padx=5, pady=5)
+
+        self.fields_initialized = True
+
+    def _hide_comparison_fields(self):
+        """Hide all the comparison-related fields."""
+        self._morning_before_label.grid_remove()
+        self._morning_before_entry.grid_remove()
+        self._morning_after_label.grid_remove()
+        self._morning_after_entry.grid_remove()
+        self._evening_before_label.grid_remove()
+        self._evening_before_entry.grid_remove()
+        self._evening_after_label.grid_remove()
+        self._evening_after_entry.grid_remove()
+        self._calculate_button.grid_remove()
+        self._comparison_result_label.grid_remove()
+
+        self.fields_initialized = False
+
+    def _calculate_comparison(self):
+        """Calculate and show the differences between morning/evening PEF and before/after medication."""
+        try:
+            # Get input values with validation
+            morning_before = self._safe_float_conversion(self._morning_before_var.get())
+            morning_after = self._safe_float_conversion(self._morning_after_var.get())
+            evening_before = self._safe_float_conversion(self._evening_before_var.get())
+            evening_after = self._safe_float_conversion(self._evening_after_var.get())
+
+            # Debug: Print out the values being passed to the service
+            print(f"Morning Before: {morning_before}, Morning After: {morning_after}")
+            print(f"Evening Before: {evening_before}, Evening After: {evening_after}")
+           
+
+            # Calculate the differences using PefService
+            # If bronchodilation values are not provided, they will be passed as None
+            results = self._pef_service.calculate_pef_differences(
+            morning_before, morning_after, evening_before, evening_after
+            )
+
+            # Debug: Print out the results from the service
+            print(f"Results: {results}")
+
+            # Update the UI with the results
+            self._display_comparison_results(results)
+
+        except ValueError:
+            self._comparison_result_var.set("Virhe: Täytä kaikki kentät oikein!")
+
+    def _safe_float_conversion(self, value):
+        """Safely converts input value to float, returns None if invalid or empty."""
+        try:
+            return float(value) if value.strip() else None
+        except ValueError:
+            return None
+
+    def _display_comparison_results(self, results):
+        """Helper function to format and display results."""
+        # Format each result with a check for None to prevent errors if a value is missing
+        morning_evening_diff = f"{results['morning_evening_diff']:.2f}%" if results.get('morning_evening_diff') is not None else "Ei saatavilla"
+        before_after_diff_morning = f"{results['before_after_diff_morning']:.2f}%" if results.get('before_after_diff_morning') is not None else "Ei saatavilla"
+        before_after_diff_evening = f"{results['before_after_diff_evening']:.2f}%" if results.get('before_after_diff_evening') is not None else "Ei saatavilla"
+        warning_message = results.get('warning_message', "Ei varoitusta")
+
+        # Set the results in the UI
+        self._comparison_result_var.set(
+            f"Aamun-illan ero: {morning_evening_diff}\n"
+            f"Aamun ero ennen-jälkeen: {before_after_diff_morning}\n"
+            f"Illan ero ennen-jälkeen: {before_after_diff_evening}\n"
+            f"Varoitus: {warning_message}"
+        )
+
+
     def _initialize(self):
         self._frame = ttk.Frame(master=self._root)
 
@@ -260,3 +407,5 @@ class PefListView:
         # Initialize buttons and handlers
         self._initialize_pef_reference_button()  # Initialize the "Laske PEF-viitearvo" button
         self._initialize_logout_button()  # Initialize the logout button
+        # Initialize the 'Laske vertailu' button to start comparison calculation
+        self._initialize_comparison_button()  # Add this line
