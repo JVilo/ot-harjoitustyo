@@ -1,10 +1,10 @@
-from src.entities.user import User
-from src.entities.pef import Pef
+from entities.user import User
+from entities.pef import Pef
 
-from src.repositories.pef_repository import (
+from repositories.pef_repository import (
     pef_repository as default_pef_repository
 )
-from src.repositories.user_repository import (
+from repositories.user_repository import (
     user_repository as default_user_repository
 )
 

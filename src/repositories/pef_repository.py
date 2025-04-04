@@ -1,6 +1,6 @@
-from src.entities.pef import Pef
-from src.repositories.user_repository import user_repository
-from src.config import PEF_FILE_PATH
+from entities.pef import Pef
+from repositories.user_repository import user_repository
+from config import PEF_FILE_PATH
 
 class PefRepository:
 
