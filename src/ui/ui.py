@@ -2,6 +2,7 @@ import tkinter as tk
 from ui.login_view import LoginView
 from ui.create_user_view import CreateUserView
 from ui.pef_view import PefListView  # Import the PefListView for PEF calculation
+from services.pef_service import pef_service
 
 class UI:
     """Main UI controller that handles switching between different views."""
@@ -11,12 +12,23 @@ class UI:
         self._root = root
         self._current_view = None
 
+        self._root.geometry("1200x700")  # Set initial window size
+        self._root.resizable(False, False)  # Disable resizing
+
+
     def handle_login(self):
         # Placeholder function for handling login (this is where the user successfully logs in)
         print("Login handler called")
         
         # Once the user logs in successfully, show the PEF calculation view
         self._show_pef_view()
+
+    def handle_logout(self):
+        # Placeholder function to handle logging out
+        print("Logout handler called")
+        
+        # After logging out, show the login view again
+        self._show_login_view()
 
     def handle_create_user(self):
         # Placeholder function for handling user creation (this is where user creation logic goes)
@@ -42,7 +54,7 @@ class UI:
         self._current_view = LoginView(
             self._root,
             self.handle_login,  # Pass the handle_login function as the first handler
-            self._show_create_user_view  # Pass the _show_create_user_view function as the second handler
+            self._show_create_user_view,  # Pass the _show_create_user_view function as the second handler
         )
 
         self._current_view.pack()  # Packs the login view to display it
@@ -64,13 +76,17 @@ class UI:
         # Switches to the PEF calculation view after login
         self._hide_current_view()
 
+        user = pef_service.get_current_user()
+
         # Create an instance of PefListView for PEF calculation
-        self._current_view = PefListView(self._root)
+        self._current_view = PefListView(self._root, self.handle_logout, pef_service, user)
+        self._current_view._update_reference_pef_ui()  # Refresh the reference PEF value after login
 
         self._current_view.pack()  # Packs the PEF calculation view to display it
 
     def run(self):
         # Runs the application and initializes the Tkinter root window
         root = tk.Tk()  # Create the Tkinter root window
+        root.geometry("1200x700")  # Set the window size to 1200x700
         self.start()  # Start the UI and show the login view
         root.mainloop()  # Start Tkinter's event loop to keep the window open

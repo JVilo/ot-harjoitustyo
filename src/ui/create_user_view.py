@@ -68,29 +68,29 @@ class CreateUserView:
     def _initialize_username_field(self):
         # Initializes the username input field with a label and entry widget
         username_label = ttk.Label(master=self._frame, text="Username")
-        self._username_entry = ttk.Entry(master=self._frame)
+        self._username_entry = ttk.Entry(master=self._frame, width=30)
 
         # Places the username label and entry in the grid
         username_label.grid(padx=5, pady=5, sticky=constants.W)
-        self._username_entry.grid(padx=5, pady=5, sticky=constants.EW)
+        self._username_entry.grid(padx=5, pady=5, sticky=constants.W)
 
     def _initialize_password_field(self):
         # Initializes the password input field with a label and entry widget
         password_label = ttk.Label(master=self._frame, text="Password")
-        self._password_entry = ttk.Entry(master=self._frame, show="*")  # Mask the password input
+        self._password_entry = ttk.Entry(master=self._frame, show="*", width=30)  # Mask the password input
 
         # Places the password label and entry in the grid
         password_label.grid(padx=5, pady=5, sticky=constants.W)
-        self._password_entry.grid(padx=5, pady=5, sticky=constants.EW)
+        self._password_entry.grid(padx=5, pady=5, sticky=constants.W)
 
     def _initialize_password2_field(self):
         # Initializes the "Password again" input field with a label and entry widget
         password_label = ttk.Label(master=self._frame, text="Password again")
-        self._password2_entry = ttk.Entry(master=self._frame, show="*")  # Mask the password input
+        self._password2_entry = ttk.Entry(master=self._frame, show="*", width=30)  # Mask the password input
 
         # Places the "Password again" label and entry in the grid
         password_label.grid(padx=5, pady=5, sticky=constants.W)
-        self._password2_entry.grid(padx=5, pady=5, sticky=constants.EW)
+        self._password2_entry.grid(padx=5, pady=5, sticky=constants.W)
 
     def _initialize(self):
         # Initializes the frame and its components
@@ -115,20 +115,23 @@ class CreateUserView:
         create_user_button = ttk.Button(
             master=self._frame,
             text="Create",
-            command=self._create_user_handler  # Calls the function that handles user creation
+            command=self._create_user_handler,  # Calls the function that handles user creation
+            width=20
         )
 
         # Create the "Login" button to switch to the login view
         login_button = ttk.Button(
             master=self._frame,
             text="Login",
-            command=self._handle_show_login_view  # Calls the function to show the login view
+            command=self._handle_show_login_view,  # Calls the function to show the login view
+            width=20
         )
 
         self._frame.grid_columnconfigure(0, weight=1, minsize=400)  # Configures the grid to resize properly
 
         # Places the buttons in the grid
-        create_user_button.grid(padx=5, pady=5, sticky=constants.EW)
-        login_button.grid(padx=5, pady=5, sticky=constants.EW)
+        self._frame.grid_columnconfigure(0, weight=1, minsize=400)  # This will make the buttons expand
+        create_user_button.grid(padx=5, pady=5, sticky=constants.W)
+        login_button.grid(padx=5, pady=5, sticky=constants.W)
         # Hides the error message label initially
         self._hide_error()

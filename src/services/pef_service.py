@@ -30,17 +30,50 @@ class PefService:
         self._user_repository = user_repository
 
     def create_pef(self, value, user=None):
+        """Creates a new PEF reference and associates it with a user."""
+        if user is None:
+            user = self._user  # Fall back to the logged-in user if no user is passed
+        
+        if not user:
+            raise ValueError("No user provided and no logged-in user available.")
+        
         pef = Pef(value=value, user=user)
         return self._pef_repository.create(pef)
+
+    def get_reference_pef_for_user(self):
+        if not self._user:
+            return []
+
+        """Fetches the stored reference PEF value for the given user."""
+        ref= self._pef_repository.get_latest_for_user(self._user.username)
+        #ref = filter(lambda ref: ref)
+        return list(ref)
 
     def get_user_pef(self):
         if not self._user:
             return None
         return self._pef_repository.find_by_user(self._user)
 
-    def count_reference_pef(self, height, age, gender):
+    def count_reference_pef(self, height, age, gender, user=None):
+        """Calculates the reference PEF based on height, age, and gender."""
+        if user is None:
+            user = self._user  # Fall back to the logged-in user if no user is passed
 
-        return self._pef_repository.count_reference(height, age, gender)
+        if not user:
+            raise ValueError("No user provided and no logged-in user available.")
+        
+        if gender == "male" and age > 16:
+            height_in_m = height / 100
+            reference_pef = (((height_in_m * 5.48) + 1.58) - (age * 0.041)) * 60
+        elif gender == "female" and age > 16:
+            height_in_m = height / 100
+            reference_pef = (((height_in_m * 3.72) + 2.24) - (age * 0.03)) * 60
+        else:
+            reference_pef = ((height - 100) * 5) + 100
+
+        ref_pef = Pef(value=reference_pef, user=self._user)
+        self._pef_repository.create(ref_pef)
+        return reference_pef
 
     def login(self, username, password):
         # logs in the user if the username and password match

@@ -45,19 +45,19 @@ class LoginView:
     def _initialize_username_field(self):
         username_label = ttk.Label(master=self._frame, text="Username")
 
-        self._username_entry = ttk.Entry(master=self._frame)
+        self._username_entry = ttk.Entry(master=self._frame, width=30)
 
         username_label.grid(padx=5, pady=5, sticky=constants.W)
-        self._username_entry.grid(padx=5, pady=5, sticky=constants.EW)
+        self._username_entry.grid(padx=5, pady=5, sticky=constants.W)
 
     def _initialize_password_field(self):
         password_label = ttk.Label(master=self._frame, text="Password")
 
         # Set show="*" to mask the password
-        self._password_entry = ttk.Entry(master=self._frame, show="*")  # Password will be displayed as ****
+        self._password_entry = ttk.Entry(master=self._frame, show="*",width=30)  # Password will be displayed as ****
 
         password_label.grid(padx=5, pady=5, sticky=constants.W)
-        self._password_entry.grid(padx=5, pady=5, sticky=constants.EW)
+        self._password_entry.grid(padx=5, pady=5, sticky=constants.W)
 
     def _initialize(self):
         self._frame = ttk.Frame(master=self._root)
@@ -78,18 +78,20 @@ class LoginView:
         login_button = ttk.Button(
             master=self._frame,
             text="Login",
-            command=self._login_handler
+            command=self._login_handler,
+            width=20
         )
 
         create_user_button = ttk.Button(
             master=self._frame,
             text="Create user",
-            command=self._handle_show_create_user_view
+            command=self._handle_show_create_user_view,
+            width=20
         )
 
         self._frame.grid_columnconfigure(0, weight=1, minsize=400)
 
-        login_button.grid(padx=5, pady=5, sticky=constants.EW)
-        create_user_button.grid(padx=5, pady=5, sticky=constants.EW)
+        login_button.grid(padx=5, pady=5, sticky=constants.W)
+        create_user_button.grid(padx=5, pady=5, sticky=constants.W)
 
         self._hide_error()

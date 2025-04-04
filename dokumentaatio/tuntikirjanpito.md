@@ -23,3 +23,7 @@
 |       |  1   | Käyttöliittymän siaäänkirjautuneen näkymä. |
 | 1.4.  |0.125 | changelog dokumentin tekstin korjaus. |
 |       |      | Testin tekeminen pef_repositorylle. |
+| 2.4.  |  2   | Pylintin lisääminen projektille ja koodin korjaaminen vaatimustenmukaiseksi. |
+| 3.4.  |  2   | Käyttäjän näkymän muuttaminen niin että referensiarvon voi laskea nappia painamalla. |
+| 4.4.  | 0.5  | Lintin ongelman korjaaminen niin että importeista ei tule erroria. |
+|       |  4   | Referenssi arvon tallentaminen ja tuominen käyttäjälle jos se on jo laskettu. |
