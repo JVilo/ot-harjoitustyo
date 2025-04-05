@@ -1,40 +1,39 @@
 import unittest
-from repositories.pef_repository import pef_repository
+from unittest.mock import patch, mock_open
+from repositories.pef_repository import PefRepository
 from entities.pef import Pef
+
 
 class TestPefRepository(unittest.TestCase):
     def setUp(self):
-        self.pef_eva = Pef(500,'Eva')
-    
-    def test_count_reference_man(self):
-        # Test for male PEF calculation
-        height = 180  # cm
-        age = 30
-        gender = "male"
+        # Create a mock user directly for testing
+        class MockUser:
+            def __init__(self, username):
+                self.username = username
         
-        expected_pef = (((height / 100 * 5.48) + 1.58) - (age * 0.041)) * 60
-        reference_pef = pef_repository.count_reference(height, age, gender)
+        # Manually creating a mock user "Eva"
+        self.user_eva = MockUser("Eva")
         
-        self.assertAlmostEqual(reference_pef, expected_pef, delta=1)
+        # Create a Pef object for the test
+        self.pef_eva = Pef(value=500, user=self.user_eva)
+        
+        # Initialize the repository with a mock file path
+        self.pef_repository = PefRepository("mock_pef_file.txt")
 
-    def test_count_reference_woman(self):
-        # Test for female PEF calculation
-        height = 165  # cm
-        age = 30
-        gender = "female"
+    def test_create(self):
+        # Test the create method to save a new PEF reference for a user
+        new_pef = Pef(value=600, user=self.user_eva)
         
-        expected_pef = (((height / 100 * 3.72) + 2.24) - (age * 0.03)) * 60
-        reference_pef = pef_repository.count_reference(height, age, gender)
-        
-        self.assertAlmostEqual(reference_pef, expected_pef, delta=1)
+        # Mock the file read operation to simulate the file content
+        with patch("builtins.open", new_callable=mock_open, read_data="1;500;Eva\n"):
+            # Mock the _write method to prevent actual file writing
+            with patch.object(self.pef_repository, "_write", return_value=None) as mock_write:
+                saved_pefs = self.pef_repository.create(new_pef)
+                
+                # Assert that the new PEF is added to the list
+                self.assertEqual(saved_pefs[-1].value, 600)
+                self.assertEqual(saved_pefs[-1].user.username, "Eva")
+                
+                # Ensure that the _write method is called
+                mock_write.assert_called_once()
 
-    def test_count_reference_child(self):
-        # Test for child PEF calculation
-        height = 120  # cm
-        age = 10
-        gender = "other"  # Using "other" for child
-        
-        expected_pef = ((height - 100) * 5) + 100
-        reference_pef = pef_repository.count_reference(height, age, gender)
-        
-        self.assertEqual(reference_pef, expected_pef)

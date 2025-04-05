@@ -5,7 +5,7 @@ __pycache__/
 *.py[cod]
 *.pyc
 .venv
-
+*.txt
 
 database.sqlite
 pef.csv
