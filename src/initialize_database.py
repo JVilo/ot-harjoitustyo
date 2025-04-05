@@ -14,7 +14,6 @@ def drop_tables(connection):
 
 def create_tables(connection):
 
-
     cursor = connection.cursor()
 
     cursor.execute("""
@@ -28,7 +27,6 @@ def create_tables(connection):
 
 
 def initialize_database():
-
 
     connection = get_database_connection()
 

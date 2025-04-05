@@ -3,6 +3,7 @@ from entities.pef import Pef
 from repositories.user_repository import user_repository
 from config import PEF_FILE_PATH
 
+
 class PefRepository:
     """Repository class for managing PEF references."""
 
@@ -32,7 +33,8 @@ class PefRepository:
             List of Pef objects belonging to the user.
         """
         pefs = self.find_all()
-        user_pefs = filter(lambda pef: pef.user and pef.user.username == user.username, pefs)
+        user_pefs = filter(
+            lambda pef: pef.user and pef.user.username == user.username, pefs)
         return list(user_pefs)
 
     def create(self, reference_pef):
@@ -58,13 +60,15 @@ class PefRepository:
     def get_latest_for_user(self, username):
         ref = self.find_all()
 
-        return [pef for pef in ref if pef.user and pef.user.username == username]  # Adjust based on your actual repository code
+        # Adjust based on your actual repository code
+        return [pef for pef in ref if pef.user and pef.user.username == username]
 
     def _ensure_file_exists(self):
         """Ensures the file exists."""
         # Make sure the directory exists
         directory = Path(self._file_path).parent
-        directory.mkdir(parents=True, exist_ok=True)  # Create the directory if it doesn't exist
+        # Create the directory if it doesn't exist
+        directory.mkdir(parents=True, exist_ok=True)
 
         # Create the file if it doesn't exist
         Path(self._file_path).touch()
@@ -85,7 +89,8 @@ class PefRepository:
                 pef_id = parts[0]
                 value = float(parts[1])
                 username = parts[2]
-                user = user_repository.find_by_username(username) if username else None
+                user = user_repository.find_by_username(
+                    username) if username else None
                 pefs.append(Pef(value=value, user=user, pef_id=pef_id))
 
         return pefs
@@ -102,5 +107,6 @@ class PefRepository:
             for pef in pefs:
                 row = f"{pef.pef_id};{pef.value};{pef.user.username if pef.user else ''}"
                 file.write(row + "\n")
+
 
 pef_repository = PefRepository(PEF_FILE_PATH)

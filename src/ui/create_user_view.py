@@ -31,7 +31,8 @@ class CreateUserView:
         # Handles user creation logic when the "Create" button is clicked
         username = self._username_entry.get()  # Get the entered username
         password = self._password_entry.get()  # Get the entered password
-        password2 = self._password2_entry.get()  # Get the entered password confirmation
+        # Get the entered password confirmation
+        password2 = self._password2_entry.get()
 
         # Checks if username or password is empty, shows an error if so
         if len(username) == 0 or len(password) == 0:
@@ -45,7 +46,8 @@ class CreateUserView:
 
         try:
             # Attempts to create a new user via the pef_service
-            pef_service.create_user(username, password, password2)  # Pass only the username and password
+            # Pass only the username and password
+            pef_service.create_user(username, password, password2)
             self._handle_create_user()  # Calls the handler after successful user creation
 
         except UsernameExistsError:
@@ -77,7 +79,8 @@ class CreateUserView:
     def _initialize_password_field(self):
         # Initializes the password input field with a label and entry widget
         password_label = ttk.Label(master=self._frame, text="Password")
-        self._password_entry = ttk.Entry(master=self._frame, show="*", width=30)  # Mask the password input
+        self._password_entry = ttk.Entry(
+            master=self._frame, show="*", width=30)  # Mask the password input
 
         # Places the password label and entry in the grid
         password_label.grid(padx=5, pady=5, sticky=constants.W)
@@ -86,7 +89,8 @@ class CreateUserView:
     def _initialize_password2_field(self):
         # Initializes the "Password again" input field with a label and entry widget
         password_label = ttk.Label(master=self._frame, text="Password again")
-        self._password2_entry = ttk.Entry(master=self._frame, show="*", width=30)  # Mask the password input
+        self._password2_entry = ttk.Entry(
+            master=self._frame, show="*", width=30)  # Mask the password input
 
         # Places the "Password again" label and entry in the grid
         password_label.grid(padx=5, pady=5, sticky=constants.W)
@@ -96,7 +100,8 @@ class CreateUserView:
         # Initializes the frame and its components
         self._frame = ttk.Frame(master=self._root)
 
-        self._error_variable = StringVar(self._frame)  # Variable to hold error messages
+        # Variable to hold error messages
+        self._error_variable = StringVar(self._frame)
 
         self._error_label = ttk.Label(
             master=self._frame,
@@ -104,7 +109,8 @@ class CreateUserView:
             foreground="red"  # Set the error text color to red
         )
 
-        self._error_label.grid(padx=5, pady=5)  # Places the error label in the grid
+        # Places the error label in the grid
+        self._error_label.grid(padx=5, pady=5)
 
         # Initializes the username, password, and password confirmation fields
         self._initialize_username_field()
@@ -115,7 +121,8 @@ class CreateUserView:
         create_user_button = ttk.Button(
             master=self._frame,
             text="Create",
-            command=self._create_user_handler,  # Calls the function that handles user creation
+            # Calls the function that handles user creation
+            command=self._create_user_handler,
             width=20
         )
 
@@ -123,14 +130,17 @@ class CreateUserView:
         login_button = ttk.Button(
             master=self._frame,
             text="Login",
-            command=self._handle_show_login_view,  # Calls the function to show the login view
+            # Calls the function to show the login view
+            command=self._handle_show_login_view,
             width=20
         )
 
-        self._frame.grid_columnconfigure(0, weight=1, minsize=400)  # Configures the grid to resize properly
+        # Configures the grid to resize properly
+        self._frame.grid_columnconfigure(0, weight=1, minsize=400)
 
         # Places the buttons in the grid
-        self._frame.grid_columnconfigure(0, weight=1, minsize=400)  # This will make the buttons expand
+        # This will make the buttons expand
+        self._frame.grid_columnconfigure(0, weight=1, minsize=400)
         create_user_button.grid(padx=5, pady=5, sticky=constants.W)
         login_button.grid(padx=5, pady=5, sticky=constants.W)
         # Hides the error message label initially

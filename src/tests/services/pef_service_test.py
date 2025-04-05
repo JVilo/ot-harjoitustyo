@@ -4,8 +4,9 @@ from entities.pef import Pef
 from entities.user import User
 from services.pef_service import PefService, InvalidCredentialsError, UsernameExistsError, PasswordsDoNotMatch
 
+
 class TestPefService(unittest.TestCase):
-    
+
     def setUp(self):
         # Initialize a mock PefService
         self.pef_service = PefService()
@@ -18,7 +19,6 @@ class TestPefService(unittest.TestCase):
         self.pef_service._pef_repository = self.mock_pef_repository
         self.pef_service._user_repository = self.mock_user_repository
 
-
     def test_login_invalid_credentials(self):
 
         username = "wrong_user"
@@ -30,7 +30,7 @@ class TestPefService(unittest.TestCase):
 
     @patch("services.pef_service.User")
     def test_create_user_success(self, MockUser):
-        
+
         username = "new_user"
         password = "password123"
         password2 = "password123"
@@ -42,10 +42,11 @@ class TestPefService(unittest.TestCase):
 
         self.assertEqual(new_user.username, username)
         self.assertEqual(new_user.password, password)
-        self.mock_user_repository.create.assert_called_once_with(MockUser(username, password))
+        self.mock_user_repository.create.assert_called_once_with(
+            MockUser(username, password))
 
     def test_create_user_username_exists(self):
-        
+
         username = "existing_user"
         password = "password123"
         password2 = "password123"
@@ -56,7 +57,7 @@ class TestPefService(unittest.TestCase):
             self.pef_service.create_user(username, password, password2)
 
     def test_create_user_passwords_do_not_match(self):
-    
+
         username = "new_user"
         password = "password123"
         password2 = "password124"  # Different password for mismatch
@@ -67,10 +68,9 @@ class TestPefService(unittest.TestCase):
             self.pef_service.create_user(username, password, password2)
 
     def test_logout(self):
-        
+
         self.pef_service._user = MagicMock(id=1, username='test_user')
 
         self.pef_service.logout()
 
         self.assertIsNone(self.pef_service.get_current_user())
-

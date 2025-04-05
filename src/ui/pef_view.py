@@ -1,8 +1,9 @@
 from tkinter import ttk, StringVar, constants
 from services.pef_service import pef_service
 
+
 class PefListView:
-    def __init__(self, root, handle_logout, pef_service, logged_in_user=None, user = None):
+    def __init__(self, root, handle_logout, pef_service, logged_in_user=None, user=None):
         self._root = root
         self._frame = None
         self._age_var = None
@@ -20,7 +21,8 @@ class PefListView:
         self._reference_pef_var = None
         self._calculate_button = None
         self._logged_in_user = logged_in_user  # Store the logged-in user
-        self._handle_logout = handle_logout  # Logout handler to call when the button is clicked
+        # Logout handler to call when the button is clicked
+        self._handle_logout = handle_logout
 
         self._pef_reference_button = None  # Button to trigger PEF reference calculation
         self.fields_initialized = False  # Flag to track if fields are initialized
@@ -41,23 +43,25 @@ class PefListView:
 
         # Check if logged_in_user exists, and if it does, use the user's name for the greeting
         if self._logged_in_user:
-            greeting_text = f"Hi, {self._logged_in_user.name}!"  # You can use any attribute of the logged-in user
+            # You can use any attribute of the logged-in user
+            greeting_text = f"Hi, {self._logged_in_user.name}!"
         else:
             greeting_text = "Hi, Guest!"
-        
+
         # Set the greeting text
         self._greeting_var.set(greeting_text)
 
         # Create a label to display the greeting
-        greeting_label = ttk.Label(self._frame, textvariable=self._greeting_var)
+        greeting_label = ttk.Label(
+            self._frame, textvariable=self._greeting_var)
         greeting_label.grid(padx=5, pady=5)
-
 
     def _initialize_logout_button(self):
         """Initialize the logout button and position it in the top-right corner."""
-        logout_button = ttk.Button(self._frame, text="Logout", command=self._logout)
-        logout_button.grid(row=0, column=1, padx=10, pady=10, sticky="ne")  # Place it in the top-right corner
-
+        logout_button = ttk.Button(
+            self._frame, text="Logout", command=self._logout)
+        # Place it in the top-right corner
+        logout_button.grid(row=0, column=1, padx=10, pady=10, sticky="ne")
 
     def _initialize_reference_label(self):
         """Initialize the reference label to display the reference PEF value."""
@@ -70,16 +74,18 @@ class PefListView:
 
     def _update_reference_pef_ui(self):
         """Fetches and displays the stored reference PEF value."""
-        reference_pef = self._pef_service.get_reference_pef_for_user() 
-        
+        reference_pef = self._pef_service.get_reference_pef_for_user()
+
         if isinstance(reference_pef, list):  # Check if reference_pef is a list
             if reference_pef:
-                reference_pef = reference_pef[-1]  # Use the first element if it's a list
+                # Use the first element if it's a list
+                reference_pef = reference_pef[-1]
             else:
                 reference_pef = None  # Handle empty list
 
         if reference_pef is not None:
-            self._reference_pef_var.set(f"PEF viitearvosi: {reference_pef.value:.2f} L/min")
+            self._reference_pef_var.set(
+                f"PEF viitearvosi: {reference_pef.value:.2f} L/min")
         else:
             self._reference_pef_var.set("No reference PEF value found.")
 
@@ -100,14 +106,17 @@ class PefListView:
         try:
             # Get user inputs
             age = int(self._age_var.get())  # Get the age from the dropdown
-            height = float(self._height_var.get())  # Get the height from the text entry
+            # Get the height from the text entry
+            height = float(self._height_var.get())
             gender = self._gender_var.get()  # Get the gender value (male or female)
-            
+
             # Call the method to calculate the reference PEF value
-            reference_pef = pef_service.count_reference_pef(height, age, gender)
+            reference_pef = pef_service.count_reference_pef(
+                height, age, gender)
 
             # Update the displayed reference PEF value
-            self._reference_pef_var.set(f"PEF viitearvosi: {reference_pef:.2f} L/min")
+            self._reference_pef_var.set(
+                f"PEF viitearvosi: {reference_pef:.2f} L/min")
             self._error_label.grid_remove()  # Hide error if calculation was successful
 
             # Hide the input fields and their labels after calculation
@@ -162,31 +171,39 @@ class PefListView:
 
     def _initialize_age_dropdown(self):
         # Ensure age dropdown is initialized
-        self._age_label = ttk.Label(master=self._frame, text="Ikä (vuosina)")  # Label for age
+        self._age_label = ttk.Label(
+            master=self._frame, text="Ikä (vuosina)")  # Label for age
         self._age_var = StringVar(self._frame)
-        age_options = [str(i) for i in range(5, 100)]  # Age dropdown from 5 to 99
+        # Age dropdown from 5 to 99
+        age_options = [str(i) for i in range(5, 100)]
         self._age_var.set(age_options[0])  # Default age
 
-        self._age_dropdown = ttk.Combobox(master=self._frame, textvariable=self._age_var, values=age_options, state="readonly")
+        self._age_dropdown = ttk.Combobox(
+            master=self._frame, textvariable=self._age_var, values=age_options, state="readonly")
         self._age_label.grid(padx=5, pady=5, sticky=constants.W)
         self._age_dropdown.grid(padx=5, pady=5, sticky=constants.EW)
 
     def _initialize_height_field(self):
-        self._height_label = ttk.Label(master=self._frame, text="Pituus (cm)")  # Label for height
+        self._height_label = ttk.Label(
+            master=self._frame, text="Pituus (cm)")  # Label for height
         self._height_var = StringVar(self._frame)
 
-        self._height_entry = ttk.Entry(master=self._frame, textvariable=self._height_var)
+        self._height_entry = ttk.Entry(
+            master=self._frame, textvariable=self._height_var)
         self._height_label.grid(padx=5, pady=5, sticky=constants.W)
         self._height_entry.grid(padx=5, pady=5, sticky=constants.EW)
 
     def _initialize_gender_checkboxes(self):
-        self._gender_label = ttk.Label(master=self._frame, text="Sukupuoli")  # Label for gender
+        self._gender_label = ttk.Label(
+            master=self._frame, text="Sukupuoli")  # Label for gender
         self._gender_var = StringVar(self._frame)
         self._gender_var.set("")  # Default to empty value
 
-        self._male_checkbox = ttk.Radiobutton(master=self._frame, text="Mies", variable=self._gender_var, value="male")
-        self._female_checkbox = ttk.Radiobutton(master=self._frame, text="Nainen", variable=self._gender_var, value="female")
-        
+        self._male_checkbox = ttk.Radiobutton(
+            master=self._frame, text="Mies", variable=self._gender_var, value="male")
+        self._female_checkbox = ttk.Radiobutton(
+            master=self._frame, text="Nainen", variable=self._gender_var, value="female")
+
         self._gender_label.grid(padx=5, pady=5, sticky=constants.W)
         self._male_checkbox.grid(padx=5, pady=5, sticky=constants.W)
         self._female_checkbox.grid(padx=5, pady=5, sticky=constants.W)
@@ -246,9 +263,11 @@ class PefListView:
     def _enable_finish_button(self, *args):
         """Enables the 'Laske' button when all fields are filled."""
         if self._age_var.get() and self._height_var.get() and self._gender_var.get():
-            self._calculate_button.config(state=constants.NORMAL)  # Enable the button
+            self._calculate_button.config(
+                state=constants.NORMAL)  # Enable the button
         else:
-            self._calculate_button.config(state=constants.DISABLED)  # Keep it disabled if fields are empty
+            # Keep it disabled if fields are empty
+            self._calculate_button.config(state=constants.DISABLED)
 
     def _initialize_comparison_button(self):
         """Initializes the 'Laske vertailu' button to start the comparison."""
@@ -257,7 +276,8 @@ class PefListView:
             text="Laske vertailu",
             command=self._toggle_comparison_fields
         )
-        self._calculate_comparison_button.grid(padx=5, pady=5, sticky=constants.EW)
+        self._calculate_comparison_button.grid(
+            padx=5, pady=5, sticky=constants.EW)
 
     def _toggle_comparison_fields(self):
         """Shows or hides the fields for morning/evening PEF values and handles calculation."""
@@ -279,16 +299,24 @@ class PefListView:
         self._evening_after_var = StringVar(self._frame)
 
         # Create labels for the input fields
-        self._morning_before_label = ttk.Label(master=self._frame, text="Aamun PEF ennen lääkettä (L/min)")
-        self._morning_after_label = ttk.Label(master=self._frame, text="Aamun PEF jälkeen lääkettä (L/min)")
-        self._evening_before_label = ttk.Label(master=self._frame, text="Illan PEF ennen lääkettä (L/min)")
-        self._evening_after_label = ttk.Label(master=self._frame, text="Illan PEF jälkeen lääkettä (L/min)")
+        self._morning_before_label = ttk.Label(
+            master=self._frame, text="Aamun PEF ennen lääkettä (L/min)")
+        self._morning_after_label = ttk.Label(
+            master=self._frame, text="Aamun PEF jälkeen lääkettä (L/min)")
+        self._evening_before_label = ttk.Label(
+            master=self._frame, text="Illan PEF ennen lääkettä (L/min)")
+        self._evening_after_label = ttk.Label(
+            master=self._frame, text="Illan PEF jälkeen lääkettä (L/min)")
 
         # Create entry fields for the PEF values
-        self._morning_before_entry = ttk.Entry(master=self._frame, textvariable=self._morning_before_var)
-        self._morning_after_entry = ttk.Entry(master=self._frame, textvariable=self._morning_after_var)
-        self._evening_before_entry = ttk.Entry(master=self._frame, textvariable=self._evening_before_var)
-        self._evening_after_entry = ttk.Entry(master=self._frame, textvariable=self._evening_after_var)
+        self._morning_before_entry = ttk.Entry(
+            master=self._frame, textvariable=self._morning_before_var)
+        self._morning_after_entry = ttk.Entry(
+            master=self._frame, textvariable=self._morning_after_var)
+        self._evening_before_entry = ttk.Entry(
+            master=self._frame, textvariable=self._evening_before_var)
+        self._evening_after_entry = ttk.Entry(
+            master=self._frame, textvariable=self._evening_after_var)
 
         # Grid the labels and entry fields
         self._morning_before_label.grid(padx=5, pady=5, sticky=constants.W)
@@ -341,20 +369,25 @@ class PefListView:
         """Calculate and show the differences between morning/evening PEF and before/after medication."""
         try:
             # Get input values with validation
-            morning_before = self._safe_float_conversion(self._morning_before_var.get())
-            morning_after = self._safe_float_conversion(self._morning_after_var.get())
-            evening_before = self._safe_float_conversion(self._evening_before_var.get())
-            evening_after = self._safe_float_conversion(self._evening_after_var.get())
+            morning_before = self._safe_float_conversion(
+                self._morning_before_var.get())
+            morning_after = self._safe_float_conversion(
+                self._morning_after_var.get())
+            evening_before = self._safe_float_conversion(
+                self._evening_before_var.get())
+            evening_after = self._safe_float_conversion(
+                self._evening_after_var.get())
 
             # Debug: Print out the values being passed to the service
-            print(f"Morning Before: {morning_before}, Morning After: {morning_after}")
-            print(f"Evening Before: {evening_before}, Evening After: {evening_after}")
-           
+            print(
+                f"Morning Before: {morning_before}, Morning After: {morning_after}")
+            print(
+                f"Evening Before: {evening_before}, Evening After: {evening_after}")
 
             # Calculate the differences using PefService
             # If bronchodilation values are not provided, they will be passed as None
             results = self._pef_service.calculate_pef_differences(
-            morning_before, morning_after, evening_before, evening_after
+                morning_before, morning_after, evening_before, evening_after
             )
 
             # Debug: Print out the results from the service
@@ -364,7 +397,8 @@ class PefListView:
             self._display_comparison_results(results)
 
         except ValueError:
-            self._comparison_result_var.set("Virhe: Täytä kaikki kentät oikein!")
+            self._comparison_result_var.set(
+                "Virhe: Täytä kaikki kentät oikein!")
 
     def _safe_float_conversion(self, value):
         """Safely converts input value to float, returns None if invalid or empty."""
@@ -376,9 +410,12 @@ class PefListView:
     def _display_comparison_results(self, results):
         """Helper function to format and display results."""
         # Format each result with a check for None to prevent errors if a value is missing
-        morning_evening_diff = f"{results['morning_evening_diff']:.2f}%" if results.get('morning_evening_diff') is not None else "Ei saatavilla"
-        before_after_diff_morning = f"{results['before_after_diff_morning']:.2f}%" if results.get('before_after_diff_morning') is not None else "Ei saatavilla"
-        before_after_diff_evening = f"{results['before_after_diff_evening']:.2f}%" if results.get('before_after_diff_evening') is not None else "Ei saatavilla"
+        morning_evening_diff = f"{results['morning_evening_diff']:.2f}%" if results.get(
+            'morning_evening_diff') is not None else "Ei saatavilla"
+        before_after_diff_morning = f"{results['before_after_diff_morning']:.2f}%" if results.get(
+            'before_after_diff_morning') is not None else "Ei saatavilla"
+        before_after_diff_evening = f"{results['before_after_diff_evening']:.2f}%" if results.get(
+            'before_after_diff_evening') is not None else "Ei saatavilla"
         warning_message = results.get('warning_message', "Ei varoitusta")
 
         # Set the results in the UI
@@ -389,11 +426,11 @@ class PefListView:
             f"Varoitus: {warning_message}"
         )
 
-
     def _initialize(self):
         self._frame = ttk.Frame(master=self._root)
 
-        self._error_variable = StringVar(self._frame)  # Variable for error messages
+        self._error_variable = StringVar(
+            self._frame)  # Variable for error messages
         self._error_label = ttk.Label(
             master=self._frame,
             textvariable=self._error_variable,
@@ -405,7 +442,8 @@ class PefListView:
         self._update_reference_pef_ui()  # Now we can safely call this method
 
         # Initialize buttons and handlers
-        self._initialize_pef_reference_button()  # Initialize the "Laske PEF-viitearvo" button
+        # Initialize the "Laske PEF-viitearvo" button
+        self._initialize_pef_reference_button()
         self._initialize_logout_button()  # Initialize the logout button
         # Initialize the 'Laske vertailu' button to start comparison calculation
         self._initialize_comparison_button()  # Add this line

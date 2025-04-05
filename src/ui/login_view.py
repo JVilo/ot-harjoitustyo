@@ -56,7 +56,9 @@ class LoginView:
         password_label = ttk.Label(master=self._frame, text="Password")
 
         # Set show="*" to mask the password
-        self._password_entry = ttk.Entry(master=self._frame, show="*",width=30)  # Password will be displayed as ****
+        # Password will be displayed as ****
+        self._password_entry = ttk.Entry(
+            master=self._frame, show="*", width=30)
 
         password_label.grid(padx=5, pady=5, sticky=constants.W)
         self._password_entry.grid(padx=5, pady=5, sticky=constants.W)

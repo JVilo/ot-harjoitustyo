@@ -1,5 +1,6 @@
 import uuid
 
+
 class Pef:
     """Class representing a PEF reference."""
 
