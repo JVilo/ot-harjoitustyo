@@ -70,10 +70,10 @@ Sovelluksen juureen sijoitettu konfiguraatiotiedosto `.env` määrittelee tiedos
 
 Sovellus tallettaa PEF-arvot CSV-tiedostoon seuraavassa formaatissa:
 
-´´´
+```
 5749b61f-f312-45ef-94a1-71a758feee2b;120.5;matti
 65eef813-330a-4714-887b-2bda4d744487;115.7;kalle
-´´´
+```
 
 Eli PEF-arvon id (`pef_id`), PEF-arvo (`value`, desimaaliluku) ja käyttäjän käyttäjätunnus (`username`). Kenttien arvot erotellaan puolipisteellä (`;`).
 
@@ -87,7 +87,7 @@ Seuraavaksi kuvataan sovelluksen toimintalogiikka muutamien päätoiminnallisuuk
 
 Kun käyttäjä syöttää käyttäjätunnuksen ja salasanan kirjautumisnäkymän kenttiin ja painaa Login -painiketta, sovelluksen kontrolli etenee seuraavasti:
 
-´´´mermaid
+```mermaid
 sequenceDiagram
   actor Eva
   participant UI
@@ -99,7 +99,7 @@ sequenceDiagram
   UserRepository-->>PefService: user
   PefService-->>UI: user
   UI->UI: show_pefs_view()
-´´´
+```
 
 Kun käyttäjä painaa kirjautumispainiketta, [tapahtumankäsittelijä](https://github.com/JVilo/ot-harjoitustyo/blob/main/src/ui/login_view.py) kutsuu sovelluslogiikan PefService-luokan metodia [login](https://github.com/JVilo/ot-harjoitustyo/blob/d49ccd076caaee7b330dac9481216666182a3d0e/src/services/pef_service.py#L79) ja antaa sille käyttäjätunnuksen ja salasanan parametreina. Sovelluslogiikka käyttää `UserRepository`:a tarkistaakseen, onko kyseinen käyttäjätunnus olemassa. Jos tunnus löytyy, verrataan salasanaa tallennettuun arvoon. Mikäli salasanat täsmäävät, kirjautuminen onnistuu. Tämän jälkeen käyttöliittymä siirtyy `PefsView`-näkymään ja näyttää kirjautuneelle käyttäjälle hänen PEF-arvonsa.
 
@@ -107,7 +107,7 @@ Kun käyttäjä painaa kirjautumispainiketta, [tapahtumankäsittelijä](https://
 
 Kun uuden käyttäjän luomisnäkymässä on syötetty käyttäjätunnus, joka ei ole jo käytössä sekä salasana, jonka jälkeen klikataan painiketta "Create", etenee sovelluksen kontrolli seuraavasti:
 
-´´´mermaid
+```mermaid
 sequenceDiagram
   actor User
   participant UI
@@ -123,7 +123,7 @@ sequenceDiagram
   UserRepository-->>PefService: user
   PefService-->>UI: user
   UI->>UI: show_pefs_view()
-´´´
+```
 
 [Tapahtumakäsittelijä](https://github.com/JVilo/ot-harjoitustyo/blob/main/src/ui/create_user_view.py) kutsuu sovelluslogiikan [create_user](https://github.com/JVilo/ot-harjoitustyo/blob/d49ccd076caaee7b330dac9481216666182a3d0e/src/services/pef_service.py#L155)-metodia ja välittää siihen uuden käyttäjän tiedot. Sovelluslogiikka tarkistaa `UserRepository`:n avulla, onko annetulla käyttäjätunnuksella jo olemassa olevaa tiliä. Jos käyttäjätunnus ei ole käytössä, luodaan uusi `User`-olio, joka tallennetaan kutsumalla `UserRepository`:n `create`-metodia. Tämän jälkeen käyttöliittymä vaihtaa näkymäksi `PefsView`:n ja uusi käyttäjä kirjataan automaattisesti sisään.
 
@@ -131,7 +131,7 @@ sequenceDiagram
 
 Kun käyttäjä valitsee 'Laske PEF-viitearvo' -painikkeen, sovelluksen toiminta etenee seuraavalla tavalla:
 
-´´´mermaid
+```mermaid
 sequenceDiagram
   actor User
   participant UI
@@ -145,7 +145,7 @@ sequenceDiagram
   PefRepository-->>PefService: pef
   PefService-->>UI: pef
   UI->>UI: _update_reference_pef_ui()
-´´´
+```
 
 [Tapahtumakäsittelijä]() kutsuu sovelluslogiikan metodia [calculate_pef_reference](https://github.com/JVilo/ot-harjoitustyo/blob/d49ccd076caaee7b330dac9481216666182a3d0e/src/services/pef_service.py#L57), antaen parametreina tarvittavat tiedot (esim. pituus, ikä, sukupuoli) PEF-viitearvon laskemiseksi. Sovelluslogiikka luo uuden `Pef`-olion kutsumalla `PefService`:n `create_pef`-metodia ja tallentaa sen kutsumalla `PefRepository`:n `create`-metodia. Tämän seurauksena käyttöliittymä päivittää näytettävän PEF-viitearvon kutsumalla omaa metodiaan _update_reference_pef_ui().
 
