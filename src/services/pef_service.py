@@ -49,7 +49,6 @@ class PefService:
         if not self._user:
             return []
 
-
         ref = self._pef_repository.get_latest_for_user(self._user.username)
 
         return list(ref)
@@ -104,29 +103,29 @@ class PefService:
 
     def get_warning_message(
             self, morning_evening_diff, morning_before_after_diff, evening_before_after_diff
-            ):
+    ):
         """Returns a warning message 
         if any of the PEF differences exceed the threshold values."""
 
         # Check if the values are not None before comparing them
         if morning_evening_diff is not None and (
             morning_evening_diff > 20 or morning_evening_diff > 60
-            ):
+        ):
             return "PEF ero aamun ja illan välillä on yli 20% tai 60 L/min!"
         if morning_before_after_diff is not None and (
             morning_before_after_diff > 15 or morning_before_after_diff > 60
-            ):
+        ):
             return "PEF ero aamun ennen ja jälkeen lääkkeen on yli 15% tai 60 L/min!"
         if evening_before_after_diff is not None and (
             evening_before_after_diff > 15 or evening_before_after_diff > 60
-            ):
+        ):
             return "PEF ero illan ennen ja jälkeen lääkkeen on yli 15% tai 60 L/min!"
 
         return ""
 
     def calculate_pef_differences(
             self, morning_before, morning_after, evening_before, evening_after
-            ):
+    ):
         """Calculates the percentage differences 
         for morning/evening and before/after PEF with optional bronchodilation."""
 
