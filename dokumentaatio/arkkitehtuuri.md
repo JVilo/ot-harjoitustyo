@@ -139,11 +139,11 @@ sequenceDiagram
   participant Pef
   User->>+UI: click "Laske PEF-viitearvo"
   UI->>+PefService: calculate_pef_reference(height, age, gender)
-  PefService->>+Pef: Pef(reference_value, user, pef_id)
   PefService->>+PefRepository: count_reference_pef( height, age, gender, user=None)
- PefRepository->>+Pef : create(pef)
+  PefRepository->>+Pef: create(pef)
   PefRepository-->>-PefService: pef
   PefService-->>-UI: pef
+  Pef-->>-PefReopsitory: pef
   UI->>UI: _update_reference_pef_ui()
 ```
 
