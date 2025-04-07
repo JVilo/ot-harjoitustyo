@@ -112,16 +112,16 @@ sequenceDiagram
   participant UI
   participant PefService
   participant UserRepository
-  participant User
+  participant eva
   User(eva)->>+UI: click "Create user" button
-  UI->>+PefService: create_user("eva", "eva321")
+  UI->>+PefService: create_user("eva", "eva321", "eva321")
   PefService->>+UserRepository: find_by_username("eva")
   UserRepository-->>-PefService: None
-  PefService->>+UserRepository: create_user("eva", "eva321")
-  UserRepository->>+User: create(eva)
+  PefService->>eva: User("eva", "eva321")
+  PefService->>+UserRepository: create("eva")
   UserRepository-->>-PefService: user
   PefService-->>-UI: user
-  User-->>-UserRepository: user
+  Ui->>Ui: show_login_view()
 ```
 
 [Tapahtumakäsittelijä](https://github.com/JVilo/ot-harjoitustyo/blob/main/src/ui/create_user_view.py) kutsuu sovelluslogiikan [create_user](https://github.com/JVilo/ot-harjoitustyo/blob/d49ccd076caaee7b330dac9481216666182a3d0e/src/services/pef_service.py#L155)-metodia ja välittää siihen uuden käyttäjän tiedot. Sovelluslogiikka tarkistaa `UserRepository`:n avulla, onko annetulla käyttäjätunnuksella jo olemassa olevaa tiliä. Jos käyttäjätunnus ei ole käytössä, luodaan uusi `User`-olio, joka tallennetaan kutsumalla `UserRepository`:n `create`-metodia. Tämän jälkeen käyttöliittymä vaihtaa näkymäksi `PefsView`:n ja uusi käyttäjä kirjataan automaattisesti sisään.
@@ -136,15 +136,12 @@ sequenceDiagram
   participant UI
   participant PefService
   participant PefRepository
-  participant Pef
   User->>+UI: click "Laske PEF-viitearvo"
-  UI->>+PefService: calculate_pef_reference(height, age, gender)
-  PefService->>+PefRepository: count_reference_pef( height, age, gender, user=None)
-  PefRepository->>+Pef: create(pef)
+  UI->>+PefService: count_reference_pef( height, age, gender)
+  PefService->>+PefRepository: create(reference_pef)
   PefRepository-->>-PefService: pef
   PefService-->>-UI: pef
-  Pef-->>-PefRepository: pef
-  UI->>UI: _update_reference_pef_ui()
+  UI->>UI: update_reference_pef_ui()
 ```
 
 [Tapahtumakäsittelijä]() kutsuu sovelluslogiikan metodia [calculate_pef_reference](https://github.com/JVilo/ot-harjoitustyo/blob/d49ccd076caaee7b330dac9481216666182a3d0e/src/services/pef_service.py#L57), antaen parametreina tarvittavat tiedot (esim. pituus, ikä, sukupuoli) PEF-viitearvon laskemiseksi. Sovelluslogiikka luo uuden `Pef`-olion kutsumalla `PefService`:n `count_reference_pef`-metodia ja tallentaa sen kutsumalla `PefRepository`:n `create`-metodia. Tämän seurauksena käyttöliittymä päivittää näytettävän PEF-viitearvon kutsumalla omaa metodiaan _update_reference_pef_ui().
