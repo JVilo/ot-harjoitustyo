@@ -144,7 +144,7 @@ sequenceDiagram
   UI->>UI: update_reference_pef_ui()
 ```
 
-[Tapahtumakäsittelijä]() kutsuu sovelluslogiikan metodia [calculate_pef_reference](https://github.com/JVilo/ot-harjoitustyo/blob/d49ccd076caaee7b330dac9481216666182a3d0e/src/services/pef_service.py#L57), antaen parametreina tarvittavat tiedot (esim. pituus, ikä, sukupuoli) PEF-viitearvon laskemiseksi. Sovelluslogiikka luo uuden `Pef`-olion kutsumalla `PefService`:n `count_reference_pef`-metodia ja tallentaa sen kutsumalla `PefRepository`:n `create`-metodia. Tämän seurauksena käyttöliittymä päivittää näytettävän PEF-viitearvon kutsumalla omaa metodiaan _update_reference_pef_ui().
+[Tapahtumakäsittelijä]() kutsuu sovelluslogiikan metodia [calculate_pef_reference](https://github.com/JVilo/ot-harjoitustyo/blob/d49ccd076caaee7b330dac9481216666182a3d0e/src/services/pef_service.py#L57), antaen parametreina tarvittavat tiedot (esim. pituus, ikä, sukupuoli) PEF-viitearvon laskemiseksi. Sovelluslogiikka luo uuden `Pef`-olion kutsumalla `PefService`:n `count_reference_pef`-metodia ja tallentaa sen kutsumalla `PefRepository`:n `create`-metodia. Tämän seurauksena käyttöliittymä päivittää näytettävän PEF-viitearvon kutsumalla omaa metodiaan `_update_reference_pef_ui()`.
 
 ### Muut toiminnallisuudet
 
