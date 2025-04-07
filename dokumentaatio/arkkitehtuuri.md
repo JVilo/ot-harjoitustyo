@@ -71,8 +71,8 @@ Sovelluksen juureen sijoitettu konfiguraatiotiedosto `.env` määrittelee tiedos
 Sovellus tallettaa PEF-arvot CSV-tiedostoon seuraavassa formaatissa:
 
 ```
-5749b61f-f312-45ef-94a1-71a758feee2b;120.5;matti
-65eef813-330a-4714-887b-2bda4d744487;115.7;kalle
+5749b61f-f312-45ef-94a1-71a758feee2b;350.0;martta
+65eef813-330a-4714-887b-2bda4d744487;400.7;minna
 ```
 
 Eli PEF-arvon id (`pef_id`), PEF-arvo (`value`, desimaaliluku) ja käyttäjän käyttäjätunnus (`username`). Kenttien arvot erotellaan puolipisteellä (`;`).
