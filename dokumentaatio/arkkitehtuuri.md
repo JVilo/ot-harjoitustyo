@@ -151,4 +151,4 @@ sequenceDiagram
 
 ### Muut toiminnallisuudet
 
-Sama periaate pätee kaikkiin sovelluksen toiminnallisuuksiin: käyttöliittymän tapahtumakäsittelijä kutsuu sovelluslogiikan metodia, joka puolestaan päivittää pefin tai kirjautuneen käyttäjän tilan. Kun kontrolli palaa takaisin käyttöliittymään, päivitetään tarvittaessa todo-lista ja aktiivinen näkymä.
+Sama periaate pätee kaikkiin sovelluksen toiminnallisuuksiin: käyttöliittymän tapahtumakäsittelijä kutsuu sovelluslogiikan metodia, joka puolestaan päivittää pefin tai kirjautuneen käyttäjän tilan. Kun kontrolli palaa takaisin käyttöliittymään, päivitetään tarvittaessa näkymä.
