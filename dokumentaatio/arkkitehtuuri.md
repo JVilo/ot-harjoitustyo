@@ -113,7 +113,7 @@ sequenceDiagram
   participant PefService
   participant UserRepository
   participant User
-  User->>+UI: click "Create user" button
+  User(eva)->>+UI: click "Create user" button
   UI->>+PefService: create_user("eva", "eva321")
   PefService->>+UserRepository: find_by_username("eva")
   UserRepository-->>+PefService: None
