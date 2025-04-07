@@ -108,7 +108,7 @@ Kun uuden käyttäjän luomisnäkymässä on syötetty käyttäjätunnus, joka e
 
 ```mermaid
 sequenceDiagram
-  actor User
+  actor User(eva)
   participant UI
   participant PefService
   participant UserRepository
