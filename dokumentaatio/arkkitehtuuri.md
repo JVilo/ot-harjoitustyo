@@ -93,12 +93,11 @@ sequenceDiagram
   participant UI
   participant PefService
   participant UserRepository
-  Eva->>UI: click "Login" button
-  UI->>PefService: login("eva", "eva321")
-  PefService->>UserRepository: find_by_username("eva")
+  Eva->>+UI: click "Login" button
+  UI->>+PefService: login("eva", "eva321")
+  PefService->>+UserRepository: find_by_username("eva")
   UserRepository-->>PefService: user
   PefService-->>UI: user
-  UI->UI: show_pefs_view()
 ```
 
 Kun käyttäjä painaa kirjautumispainiketta, [tapahtumankäsittelijä](https://github.com/JVilo/ot-harjoitustyo/blob/main/src/ui/login_view.py) kutsuu sovelluslogiikan PefService-luokan metodia [login](https://github.com/JVilo/ot-harjoitustyo/blob/d49ccd076caaee7b330dac9481216666182a3d0e/src/services/pef_service.py#L79) ja antaa sille käyttäjätunnuksen ja salasanan parametreina. Sovelluslogiikka käyttää `UserRepository`:a tarkistaakseen, onko kyseinen käyttäjätunnus olemassa. Jos tunnus löytyy, verrataan salasanaa tallennettuun arvoon. Mikäli salasanat täsmäävät, kirjautuminen onnistuu. Tämän jälkeen käyttöliittymä siirtyy `PefsView`-näkymään ja näyttää kirjautuneelle käyttäjälle hänen PEF-arvonsa.
@@ -113,16 +112,15 @@ sequenceDiagram
   participant UI
   participant PefService
   participant UserRepository
-  participant eva
-  User->>UI: click "Create user" button
-  UI->>PefService: create_user("eva", "eva321")
-  PefService->>UserRepository: find_by_username("eva")
-  UserRepository-->>PefService: None
-  PefService->>eva: User("eva", "eva321")
-  PefService->>UserRepository: create(eva)
+  participant User
+  User->>+UI: click "Create user" button
+  UI->>+PefService: create_user("eva", "eva321")
+  PefService->>+UserRepository: find_by_username("eva")
+  UserRepository-->>+PefService: None
+  PefService->>+UserRepository: create_user("eva", "eva321")
+  UserRepository->>+User: create(eva)
   UserRepository-->>PefService: user
   PefService-->>UI: user
-  UI->>UI: show_pefs_view()
 ```
 
 [Tapahtumakäsittelijä](https://github.com/JVilo/ot-harjoitustyo/blob/main/src/ui/create_user_view.py) kutsuu sovelluslogiikan [create_user](https://github.com/JVilo/ot-harjoitustyo/blob/d49ccd076caaee7b330dac9481216666182a3d0e/src/services/pef_service.py#L155)-metodia ja välittää siihen uuden käyttäjän tiedot. Sovelluslogiikka tarkistaa `UserRepository`:n avulla, onko annetulla käyttäjätunnuksella jo olemassa olevaa tiliä. Jos käyttäjätunnus ei ole käytössä, luodaan uusi `User`-olio, joka tallennetaan kutsumalla `UserRepository`:n `create`-metodia. Tämän jälkeen käyttöliittymä vaihtaa näkymäksi `PefsView`:n ja uusi käyttäjä kirjataan automaattisesti sisään.
@@ -138,11 +136,12 @@ sequenceDiagram
   participant PefService
   participant PefRepository
   participant Pef
-  User->>UI: click "Laske PEF-viitearvo"
-  UI->>PefService: calculate_pef_reference(height, age, gender)
-  PefService->>Pef: Pef(reference_value, user, pef_id)
-  PefService->>PefRepository: create(pef)
-  PefRepository-->>PefService: pef
+  User->>+UI: click "Laske PEF-viitearvo"
+  UI->>+PefService: calculate_pef_reference(height, age, gender)
+  PefService->>+Pef: Pef(reference_value, user, pef_id)
+  PefService->>+PefRepository: count_reference_pef( height, age, gender, user=None)
+ PefRepository->>+Pef : create(pef)
+  PefRepository-->> PefService: pef
   PefService-->>UI: pef
   UI->>UI: _update_reference_pef_ui()
 ```
