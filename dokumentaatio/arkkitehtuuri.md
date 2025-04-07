@@ -121,7 +121,7 @@ sequenceDiagram
   UserRepository->>+User: create(eva)
   UserRepository-->>-PefService: user
   PefService-->>-UI: user
-  Pef-->>-UserRepository: user
+  User-->>-UserRepository: user
 ```
 
 [Tapahtumakäsittelijä](https://github.com/JVilo/ot-harjoitustyo/blob/main/src/ui/create_user_view.py) kutsuu sovelluslogiikan [create_user](https://github.com/JVilo/ot-harjoitustyo/blob/d49ccd076caaee7b330dac9481216666182a3d0e/src/services/pef_service.py#L155)-metodia ja välittää siihen uuden käyttäjän tiedot. Sovelluslogiikka tarkistaa `UserRepository`:n avulla, onko annetulla käyttäjätunnuksella jo olemassa olevaa tiliä. Jos käyttäjätunnus ei ole käytössä, luodaan uusi `User`-olio, joka tallennetaan kutsumalla `UserRepository`:n `create`-metodia. Tämän jälkeen käyttöliittymä vaihtaa näkymäksi `PefsView`:n ja uusi käyttäjä kirjataan automaattisesti sisään.
