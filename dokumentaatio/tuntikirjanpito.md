@@ -30,4 +30,6 @@
 | 5.4.  | 1.5  | Käytäjä voi nyt tarkistella yksittäiten päivä mittausten erotusta sekä ennen etää lääkkeen oton jälkeen. |
 |       |  3   | Arkitehtuuri dokumentin luominen. |
 |       | 0.5  | Testin muuttaminen pef_repostitorylle. |
+| 6.4.  | 0.5  | Turhien funktioiden positaminen ja tervehdyksen lisääminen. |
+| 7.4.  |  1   | Pieniä korjauksia ja muutoksia sekvenssikaavioihin ja muualle koodiin. |
 
