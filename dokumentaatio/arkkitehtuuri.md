@@ -143,7 +143,7 @@ sequenceDiagram
   PefRepository->>+Pef: create(pef)
   PefRepository-->>-PefService: pef
   PefService-->>-UI: pef
-  Pef-->>-PefReopsitory: pef
+  Pef-->>-PefRepository: pef
   UI->>UI: _update_reference_pef_ui()
 ```
 
