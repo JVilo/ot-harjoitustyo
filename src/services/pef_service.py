@@ -33,18 +33,6 @@ class PefService:
         self._pef_repository = pef_repository
         self._user_repository = user_repository
 
-    def create_pef(self, value, user=None):
-        """Creates a new PEF reference and associates it with a user."""
-        if user is None:
-            user = self._user  # Fall back to the logged-in user if no user is passed
-
-        if not user:
-            raise ValueError(
-                "No user provided and no logged-in user available.")
-
-        pef = Pef(value=value, user=user)
-        return self._pef_repository.create(pef)
-
     def get_reference_pef_for_user(self):
         if not self._user:
             return []

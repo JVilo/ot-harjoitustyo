@@ -44,7 +44,7 @@ class PefListView:
         # Check if logged_in_user exists, and if it does, use the user's name for the greeting
         if self._logged_in_user:
             # You can use any attribute of the logged-in user
-            greeting_text = f"Hi, {self._logged_in_user.name}!"
+            greeting_text = f"Hi, {self._logged_in_user.username}!"
         else:
             greeting_text = "Hi, Guest!"
 
@@ -437,6 +437,7 @@ class PefListView:
             foreground="red"  # Error text color
         )
         self._error_label.grid(padx=5, pady=5)
+        self._initialize_greeting_label()
 
         self._initialize_reference_label()  # Initialize the reference label
         self._update_reference_pef_ui()  # Now we can safely call this method
