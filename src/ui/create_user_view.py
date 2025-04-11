@@ -19,9 +19,9 @@ class CreateUserView:
 
         self._initialize()
 
-    def pack(self):
-        # Packs the frame to make it visible in the window
-        self._frame.pack(fill=constants.X)
+    def grid(self, **kwargs):
+        # Grid the frame to make it visible in the window
+        self._frame.grid(**kwargs)
 
     def destroy(self):
         # Destroys the frame, removing it from the window
@@ -139,8 +139,6 @@ class CreateUserView:
         self._frame.grid_columnconfigure(0, weight=1, minsize=400)
 
         # Places the buttons in the grid
-        # This will make the buttons expand
-        self._frame.grid_columnconfigure(0, weight=1, minsize=400)
         create_user_button.grid(padx=5, pady=5, sticky=constants.W)
         login_button.grid(padx=5, pady=5, sticky=constants.W)
         # Hides the error message label initially

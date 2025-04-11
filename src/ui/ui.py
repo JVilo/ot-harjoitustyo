@@ -16,6 +16,10 @@ class UI:
         self._root.geometry("1200x700")  # Set initial window size
         self._root.resizable(False, False)  # Disable resizing
 
+        # Ensure grid layout is properly set up for root window
+        self._root.grid_rowconfigure(0, weight=1)
+        self._root.grid_columnconfigure(0, weight=1)
+
     def handle_login(self):
         # Placeholder function for handling login (this is where the user successfully logs in)
         print("Login handler called")
@@ -54,11 +58,11 @@ class UI:
         self._current_view = LoginView(
             self._root,
             self.handle_login,  # Pass the handle_login function as the first handler
-            # Pass the _show_create_user_view function as the second handler
             self._show_create_user_view,
         )
 
-        self._current_view.pack()  # Packs the login view to display it
+        # Use grid() instead of pack
+        self._current_view.grid(row=0, column=0, sticky="nsew")
 
     def _show_create_user_view(self):
         # Switches to the create user view, hiding the current view first
@@ -71,7 +75,8 @@ class UI:
             self._show_login_view  # Pass the handle_show_login_view function as the second handler
         )
 
-        self._current_view.pack()  # Packs the create user view to display it
+        # Use grid() instead of pack
+        self._current_view.grid(row=0, column=0, sticky="nsew")
 
     def _show_pef_view(self):
         # Switches to the PEF calculation view after login
@@ -81,11 +86,13 @@ class UI:
 
         # Create an instance of PefListView for PEF calculation
         self._current_view = PefListView(
-            self._root, self.handle_logout, pef_service, user)
+            self._root, self.handle_logout, pef_service, user
+        )
         # Refresh the reference PEF value after login
         self._current_view._update_reference_pef_ui()
 
-        self._current_view.pack()  # Packs the PEF calculation view to display it
+        # Use grid() to add PefListView to the root window
+        self._current_view._frame.grid(row=0, column=0, sticky="nsew")
 
     def run(self):
         # Runs the application and initializes the Tkinter root window

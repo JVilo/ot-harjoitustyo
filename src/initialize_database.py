@@ -8,7 +8,9 @@ def drop_tables(connection):
     cursor.execute("""
         drop table if exists users;
     """)
-
+    cursor.execute("""
+            drop table if exists pef_monitoring;
+        """)
     connection.commit()
 
 
@@ -16,15 +18,28 @@ def create_tables(connection):
 
     cursor = connection.cursor()
 
+    # Create users table
     cursor.execute("""
-        create table users (
-            username text primary key,
-            password text
-        );
-    """)
+            create table users (
+                username text primary key,
+                password text
+            );
+        """)
 
+    # Create Pef_monitoring table with corrected syntax
+    cursor.execute("""
+            create table Pef_monitoring (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username text,
+                date date,
+                value1 integer,
+                value2 integer,
+                value3 integer,
+                state text,
+                time text
+            );
+        """)
     connection.commit()
-
 
 def initialize_database():
 

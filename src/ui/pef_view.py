@@ -1,4 +1,6 @@
 from tkinter import ttk, StringVar, constants
+from tkcalendar import Calendar
+from datetime import datetime
 from services.pef_service import pef_service
 
 
@@ -28,6 +30,14 @@ class PefListView:
         self.fields_initialized = False  # Flag to track if fields are initialized
         self._pef_service = pef_service
         self._user = user
+        self._calendar = None
+        self._time_of_day_dropdown = None
+        self._medication_dropdown = None
+        self._pef_value_1_entry = None
+        self._pef_value_2_entry = None
+        self._pef_value_3_entry = None
+        self._toggle_button = None
+        self._pef_frame = None
 
         self._initialize()
 
@@ -426,6 +436,126 @@ class PefListView:
             f"Varoitus: {warning_message}"
         )
 
+    def _create_pef_toggle_button(self):
+        """Create a button to toggle the PEF monitoring section."""
+        self._toggle_button = ttk.Button(self._root, text="Pef-seuranta", command=self._toggle_pef_section)
+        self._toggle_button.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+
+        # Create the PEF monitoring section (hidden initially)
+        self._pef_frame = ttk.Frame(self._root)
+        self._pef_frame.grid(row=1, column=0, padx=10, pady=10)
+
+        # This will initially be hidden
+        self._pef_frame.grid_forget()
+
+    def _toggle_pef_section(self):
+        """Toggle visibility of the PEF monitoring section."""
+        print("Toggling PEF section visibility")
+        if self._pef_frame.winfo_ismapped():  # If the frame is currently visible
+            self._pef_frame.grid_forget()  # Hide the frame
+            self._toggle_button.config(text="Pef-seuranta")  # Reset button text
+        else:
+            if not self._pef_frame.winfo_ismapped():  # If the frame is not visible
+                # Create the PEF monitoring section only if it's not already created
+                self._create_pef_monitoring_section()
+                # Make the frame visible
+                self._pef_frame.grid(row=1, column=0, padx=10, pady=10)  # Ensure the frame is placed in the grid
+            self._toggle_button.config(text="Piiloita pef-seuranta")
+
+    def _create_pef_monitoring_section(self):
+        """Create the PEF monitoring section inputs."""
+        # Date picker for the current date
+        self._date_label = ttk.Label(self._pef_frame, text="Valitse päivämäärä:")
+        self._date_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+
+        self._calendar = Calendar(self._pef_frame, selectmode='day', date_pattern='yyyy-mm-dd')
+        self._calendar.grid(row=0, column=1, padx=5, pady=5, sticky="w")
+        self._calendar.selection_set(datetime.today().date())  # Set default date to today
+
+        # Morning/Evening and Before/After medication dropdowns
+        self._time_of_day_label = ttk.Label(self._pef_frame, text="Aika päivästä (AAMU/ILTA):")
+        self._time_of_day_label.grid(row=1, column=0, padx=5, pady=5, sticky="w")
+
+        self._time_of_day_dropdown = ttk.Combobox(self._pef_frame, values=["AAMU", "ILTA"])
+        self._time_of_day_dropdown.grid(row=1, column=1, padx=5, pady=5)
+
+        self._medication_label = ttk.Label(self._pef_frame, text="Ennen lääkettä tai lääkkeen jälkeen:")
+        self._medication_label.grid(row=2, column=0, padx=5, pady=5, sticky="w")
+
+        self._medication_dropdown = ttk.Combobox(self._pef_frame, values=["ENNNEN LÄÄKETÄ", "LÄÄKKEEN JÄLKEEN"])
+        self._medication_dropdown.grid(row=2, column=1, padx=5, pady=5)
+
+        # PEF values (3 fields for measurements)
+        self._pef_label = ttk.Label(self._pef_frame, text="Syötä PEF-arvot (L/min):")
+        self._pef_label.grid(row=3, column=0, padx=5, pady=5, sticky="w")
+
+        self._pef_value_1_label = ttk.Label(self._pef_frame, text="PEF 1:")
+        self._pef_value_1_label.grid(row=4, column=0, padx=5, pady=5, sticky="w")
+
+        self._pef_value_1_entry = ttk.Entry(self._pef_frame)
+        self._pef_value_1_entry.grid(row=4, column=1, padx=5, pady=5)
+
+        self._pef_value_2_label = ttk.Label(self._pef_frame, text="PEF 2:")
+        self._pef_value_2_label.grid(row=5, column=0, padx=5, pady=5, sticky="w")
+
+        self._pef_value_2_entry = ttk.Entry(self._pef_frame)
+        self._pef_value_2_entry.grid(row=5, column=1, padx=5, pady=5)
+
+        self._pef_value_3_label = ttk.Label(self._pef_frame, text="PEF 3:")
+        self._pef_value_3_label.grid(row=6, column=0, padx=5, pady=5, sticky="w")
+
+        self._pef_value_3_entry = ttk.Entry(self._pef_frame)
+        self._pef_value_3_entry.grid(row=6, column=1, padx=5, pady=5)
+
+        # Save buttons
+        self._save_button = ttk.Button(self._pef_frame, text="Tallenna ja sulje", command=self._save_and_close)
+        self._save_button.grid(row=7, column=0, padx=5, pady=10)
+
+        self._save_continue_button = ttk.Button(self._pef_frame, text="Tallenna ja jatka",
+                                               command=self._save_and_continue)
+        self._save_continue_button.grid(row=7, column=1, padx=5, pady=10)
+
+    def _save_and_close(self):
+        """Save the data and close the section."""
+        self._save_pef_data()
+        self._pef_frame.grid_forget()  # Hide the PEF monitoring section
+        self._toggle_button.config(text="Pef-seuranta")  # Reset the button text
+
+    def _save_and_continue(self):
+        """Save the data and clear the fields for the next input."""
+        self._save_pef_data()
+        self._clear_pef_inputs()
+
+    def _save_pef_data(self):
+        """Collect and store the PEF monitoring data."""
+        date = self._calendar.get_date()  # Get the selected date
+        username = self._logged_in_user.username
+        value1 = self._pef_value_1_entry.get()  # First PEF value
+        value2 = self._pef_value_2_entry.get()  # Second PEF value
+        value3 = self._pef_value_3_entry.get()  # Third PEF value
+        state = self._medication_dropdown.get()  # Before or after medication
+        time = self._time_of_day_dropdown.get()
+        print(f"Date: {date}, Value1: {value1}, Value2: {value2}, Value3: {value3}, State: {state}, Time: {time}")
+
+        self._pef_service.add_value_to_monitoring(date,
+                                                  username,
+                                                  value1,
+                                                  value2,
+                                                  value3,
+                                                  state,
+                                                  time
+                                                  )
+        print(f"PEF Data Saved")
+
+    def _clear_pef_inputs(self):
+        """Clear all input fields for new data entry."""
+        self._calendar.selection_set(datetime.today().date())  # Reset calendar to today
+        self._time_of_day_dropdown.set('')  # Reset the time of day dropdown
+        self._medication_dropdown.set('')  # Reset the medication dropdown
+        self._pef_value_1_entry.delete(0, ttk.END)  # Clear PEF value 1 field
+        self._pef_value_2_entry.delete(0, ttk.END)  # Clear PEF value 2 field
+        self._pef_value_3_entry.delete(0, ttk.END)  # Clear PEF value 3 field
+
     def _initialize(self):
         self._frame = ttk.Frame(master=self._root)
 
@@ -448,3 +578,4 @@ class PefListView:
         self._initialize_logout_button()  # Initialize the logout button
         # Initialize the 'Laske vertailu' button to start comparison calculation
         self._initialize_comparison_button()  # Add this line
+        self._create_pef_toggle_button()

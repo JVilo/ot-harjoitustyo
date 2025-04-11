@@ -1,11 +1,15 @@
 from entities.user import User
 from entities.pef import Pef
+from entities.pef_monitoring import PefMonitoring
 
 from repositories.pef_repository import (
     pef_repository as default_pef_repository
 )
 from repositories.user_repository import (
     user_repository as default_user_repository
+)
+from repositories.pef_monitorin_repository import (
+    pef_monitoring_repository as default_pef_monitoring_repository
 )
 
 
@@ -26,12 +30,14 @@ class PefService:
     def __init__(
         self,
         pef_repository=default_pef_repository,
-        user_repository=default_user_repository
+        user_repository=default_user_repository,
+        pef_monitoring_repository=default_pef_monitoring_repository,
     ):
 
         self._user = None
         self._pef_repository = pef_repository
         self._user_repository = user_repository
+        self._pef_monitoring_repository = pef_monitoring_repository
 
     def get_reference_pef_for_user(self):
         if not self._user:
@@ -55,20 +61,28 @@ class PefService:
             raise ValueError(
                 "No user provided and no logged-in user available.")
 
-        if gender == "male" and age > 16:
+        if gender == "male" and age >= 16:
             height_in_m = height / 100
-            reference_pef = (((height_in_m * 5.48) + 1.58) -
-                             (age * 0.041)) * 60
-        if gender == "female" and age > 16:
+            reference_pef = (((height_in_m * 5.48) + 1.58) - (age * 0.041)) * 60
+            ref_pef = Pef(value=reference_pef, user=self._user)
+            self._pef_repository.create(ref_pef)
+            # print(f"Saving reference PEF: {reference_pef} for user: {user.username}")
+            return reference_pef
+
+        if gender == "female" and age >= 16:
             height_in_m = height / 100
             reference_pef = (((height_in_m * 3.72) + 2.24) - (age * 0.03)) * 60
-        else:
-            reference_pef = ((height - 100) * 5) + 100
+            ref_pef = Pef(value=reference_pef, user=self._user)
+            self._pef_repository.create(ref_pef)
+            # print(f"Saving reference PEF: {reference_pef} for user: {user.username}")
+            return reference_pef
 
-        ref_pef = Pef(value=reference_pef, user=self._user)
-        self._pef_repository.create(ref_pef)
-        # print(f"Saving reference PEF: {reference_pef} for user: {user.username}")
-        return reference_pef
+        if age < 16:
+            reference_pef = ((height - 100) * 5) + 100
+            ref_pef = Pef(value=reference_pef, user=self._user)
+            self._pef_repository.create(ref_pef)
+            # print(f"Saving reference PEF: {reference_pef} for user: {user.username}")
+            return reference_pef
 
     def login(self, username, password):
         # logs in the user if the username and password match
@@ -81,7 +95,6 @@ class PefService:
         self._user = user
 
         return user
-    # the ui for this -->
 
     def calculate_percentage_difference(self, before_pef, after_pef):
         """Calculates the percentage difference between before and after PEF values."""
@@ -147,8 +160,68 @@ class PefService:
             "before_after_diff_evening": before_after_diff_evening,
             "warning_message": warning_message
         }
-    # <--- is not done yet.
+# No Ui functionality yet ->
+    def add_value_to_monitoring(self,username, date,
+                                value1, value2, value3, state, time):
 
+        pef_m = self._pef_monitoring_repository.add_value(PefMonitoring(
+            date, username, value1, value2, value3, state, time))
+        return pef_m
+
+    def get_monitoring_by_username(self):
+        if not self._user:
+            return None
+        all = self._pef_monitoring_repository.find_monitoring_by_username(self._user.username)
+        return self._pef_monitoring_repository.order_by_date(all)
+
+    def calculate_monitoring_difference(self):
+        over_20 = 0
+        over_15 = 0
+        pefs = self.get_monitoring_by_username()  # Get all monitoring data for the user
+        current_day = None
+
+        # Loop through all the rows for the user, sorted by date
+        for values in pefs:
+            if current_day != values.date:
+                # We're on a new day, reset the daily values
+                current_day = values.date
+                max_m = max_m_p = max_e = max_e_p = None  # Reset max values for the day
+
+            # Process values based on state and time
+            if values.state == 'before' and values.time == 'morning':
+                max_m = max(values.value1, values.value2, values.value3)
+            elif values.state == 'after' and values.time == 'morning':
+                max_m_p = max(values.value1, values.value2, values.value3)
+            elif values.state == 'before' and values.time == 'evening':
+                max_e = max(values.value1, values.value2, values.value3)
+            elif values.state == 'after' and values.time == 'evening':
+                max_e_p = max(values.value1, values.value2, values.value3)
+
+                # Once we have all values for the day, calculate the differences
+                if (max_m is not None and max_m_p is not None
+                        and max_e is not None and max_e_p is not None):
+                    prosm = ((max_m_p - max_m) / max_m) * 100
+                    prose = ((max_e_p - max_e) / max_e) * 100
+                    pros_d = ((max_m - max_e) / max_m) * 100
+
+                    # Check if thresholds are exceeded
+                    if prosm >= 15 or prose >= 15:
+                        over_15 += 1
+                    if pros_d >= 20:
+                        over_20 += 1
+
+        # Return results based on thresholds exceeded
+        if over_20 >= 3:
+            return f'Vuorokausi vaihtelu on ylittänyt diagnoosi rajan {over_20} kertaa!'
+        if over_15 >= 3:
+            return f'Bronkodilataatiovaste on ylittänyt diagnoosi rajan {over_15} kertaa!'
+        if over_20 >= 3 and over_15 >= 3:
+            return f'Vuorokausi vaihtelu on ylittänyt diagnoosi rajan {over_20} kertaa!' \
+                   f'Bronkodilataatiovaste on ylittänyt diagnoosi rajan {over_15} kertaa!'
+
+        return "Ei merkittäviä muutoksia pef-seurannassa"
+
+# <-
     def get_current_user(self):
         # returns the current logged-in user, or None if not logged in
         return self._user

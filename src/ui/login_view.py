@@ -17,12 +17,11 @@ class LoginView:
 
         self._initialize()
 
-    def pack(self):
-
-        self._frame.pack(fill=constants.X)
+    def grid(self, **kwargs):
+        # Grid the frame (container) where all widgets are added
+        self._frame.grid(**kwargs)
 
     def destroy(self):
-
         self._frame.destroy()
 
     def _login_handler(self):
@@ -56,7 +55,6 @@ class LoginView:
         password_label = ttk.Label(master=self._frame, text="Password")
 
         # Set show="*" to mask the password
-        # Password will be displayed as ****
         self._password_entry = ttk.Entry(
             master=self._frame, show="*", width=30)
 
