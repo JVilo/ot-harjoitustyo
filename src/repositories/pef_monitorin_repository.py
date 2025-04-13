@@ -19,7 +19,7 @@ class PefMonitoringRepository:
 
     def order_by_date(self, rows):
         # Make sure the data is ordered by date (ascending)
-        return rows.sort(key=lambda x: x[2])
+        return sorted(rows, key=lambda x: x[2])
 
     def add_value(self, pef_monitoring: PefMonitoring):
         cursor = self._connection.cursor()

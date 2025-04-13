@@ -13,7 +13,7 @@ class UI:
         self._root = root
         self._current_view = None
 
-        self._root.geometry("1200x700")  # Set initial window size
+        self._root.geometry("1600x900")  # Set initial window size
         self._root.resizable(False, False)  # Disable resizing
 
         # Ensure grid layout is properly set up for root window

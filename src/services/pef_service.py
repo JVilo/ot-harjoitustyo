@@ -172,7 +172,8 @@ class PefService:
         if not self._user:
             return None
         all = self._pef_monitoring_repository.find_monitoring_by_username(self._user.username)
-        return self._pef_monitoring_repository.order_by_date(all)
+        ordered = self._pef_monitoring_repository.order_by_date(all)
+        return ordered
 
     def calculate_monitoring_difference(self):
         over_20 = 0
@@ -188,13 +189,13 @@ class PefService:
                 max_m = max_m_p = max_e = max_e_p = None  # Reset max values for the day
 
             # Process values based on state and time
-            if values.state == 'before' and values.time == 'morning':
+            if values.state == 'ENNNEN LÄÄKETÄ' and values.time == 'AAMU':
                 max_m = max(values.value1, values.value2, values.value3)
-            elif values.state == 'after' and values.time == 'morning':
+            elif values.state == 'LÄÄKKEEN JÄLKEEN' and values.time == 'AAMU':
                 max_m_p = max(values.value1, values.value2, values.value3)
-            elif values.state == 'before' and values.time == 'evening':
+            elif values.state == 'ENNNEN LÄÄKETÄ' and values.time == 'ILTA':
                 max_e = max(values.value1, values.value2, values.value3)
-            elif values.state == 'after' and values.time == 'evening':
+            elif values.state == 'LÄÄKKEEN JÄLKEEN' and values.time == 'ILTA':
                 max_e_p = max(values.value1, values.value2, values.value3)
 
                 # Once we have all values for the day, calculate the differences
