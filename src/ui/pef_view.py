@@ -628,7 +628,6 @@ class PefListView:
             return
 
         for entry in data:
-            # Assumes tuple ordering: (id, username, date, value1, value2, value3, state, time)
             self._pef_table.insert("", "end", values=(
                 entry[2], entry[3], entry[4], entry[5], entry[6], entry[7]
             ))
