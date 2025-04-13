@@ -1,7 +1,7 @@
 # Työaikakirjanpito
 
 | päivä | aika  | mitä tein                                                                                                |
-| :-----|:-----:|:---------------------------------------------------------------------------------------------------------|
+|:------|:-----:|:---------------------------------------------------------------------------------------------------------|
 | 18.3. |  1.5  | Vaatimusmäärittelyn luominen ja tuntikirjanpidon alustaminen                                             |
 | 19.3. |   1   | Tutustuminen malli sovellukseen ja toiminallisuuksien rakenteeseen                                       |
 | 23.3. | 0.25  | Poetry lisätty projektiin                                                                                |
@@ -32,5 +32,8 @@
 |       |  0.5  | Testin muuttaminen pef_repostitorylle.                                                                   |
 | 6.4.  |  0.5  | Turhien funktioiden positaminen ja tervehdyksen lisääminen.                                              |
 | 7.4.  |   1   | Pieniä korjauksia ja muutoksia sekvenssikaavioihin ja muualle koodiin.                                   |
-| 11.4  |   5   | Uuden toiminnallisuuden rakentamisen aloittaminen.                                                       |
-
+| 11.4  |   5   | Uuden toiminnallisuuden(pef-seurannan) rakentamisen aloittaminen.                                        |
+| 12.4  |   4   | Pef-seurannan napin toiminta, seurannan näyttö käyttäjälle.                                              |
+| 13.4. |   2   | Käyttöliittymän ulkkonäon mjärjestäminen/siistiminen.                                                    |
+|       |   1   | Testejä listätty uusiin tiedostoihin mm. pef-seurannan osuuteen.                                         |
+|       |   1   | Arkitehtuuri dokumentin päivittäminen, sovelluksen testaaminen.                                          |

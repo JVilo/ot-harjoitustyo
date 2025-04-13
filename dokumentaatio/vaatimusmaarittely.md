@@ -2,7 +2,7 @@
 
 ## Sovelluksen tarkoitus
 
-Sovelluksen avulla käyttäjä voi seurata omia pef-tuloksia ja nähdä oman keuhkofunktiotilanteen. Useamman rekisteröityneen käyttäjän on mahdollista käyttää sovellusta. &#10004; Käyttäjät näkevät vain omat pef-tulokset.
+Sovelluksen avulla käyttäjä voi seurata omia pef-tuloksia ja nähdä oman keuhkofunktiotilanteen. Useamman rekisteröityneen käyttäjän on mahdollista käyttää sovellusta. &#10004; Käyttäjät näkevät vain omat pef-tulokset.&#10004;
 
 ## Käyttäjät
 
