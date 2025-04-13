@@ -15,3 +15,9 @@
 - Muokattu sovellus ikkunan kokoa, nappejen sijoitusta ja miten käyttäjä suorittaa toimintoja sisään kirjautuneena.
 - Testejä muutettu sopimaan paremmin sovelluksen rekenteeseen, testi pef_repositoryssä pef-viitearvon lasku on poistettu.
 - Testattu että pef_repositoryossa pef-viitearvon luominen menee oikein.
+
+## Viikko 5
+
+- Käyttäjä voi lisätä pef-seurannan mittauksia sovellukseen.
+- Testejä lisätty uuteen pef_monitorin_repository.py tiedostolle ja pef_servises.py tiedostolle.
+- Ulkonäkö parannuksia tehty käyttöliittymään, sovellus aukeaa isommassa ikkunassa, ja kirjautuneen näkymän nappien paikkoja ja näkymien avautumista muokattu.

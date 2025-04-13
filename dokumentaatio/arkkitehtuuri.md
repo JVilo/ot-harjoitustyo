@@ -144,7 +144,56 @@ sequenceDiagram
   UI->>UI: update_reference_pef_ui()
 ```
 
-[Tapahtumakäsittelijä]() kutsuu sovelluslogiikan metodia [calculate_pef_reference](https://github.com/JVilo/ot-harjoitustyo/blob/d49ccd076caaee7b330dac9481216666182a3d0e/src/services/pef_service.py#L57), antaen parametreina tarvittavat tiedot (esim. pituus, ikä, sukupuoli) PEF-viitearvon laskemiseksi. Sovelluslogiikka luo uuden `Pef`-olion kutsumalla `PefService`:n `count_reference_pef`-metodia ja tallentaa sen kutsumalla `PefRepository`:n `create`-metodia. Tämän seurauksena käyttöliittymä päivittää näytettävän PEF-viitearvon kutsumalla omaa metodiaan `_update_reference_pef_ui()`.
+[Tapahtumakäsittelijä](https://github.com/JVilo/ot-harjoitustyo/blob/main/src/ui/pef_view.py) kutsuu sovelluslogiikan metodia [calculate_pef_reference](https://github.com/JVilo/ot-harjoitustyo/blob/d49ccd076caaee7b330dac9481216666182a3d0e/src/services/pef_service.py#L57), antaen parametreina tarvittavat tiedot (esim. pituus, ikä, sukupuoli) PEF-viitearvon laskemiseksi. Sovelluslogiikka luo uuden `Pef`-olion kutsumalla `PefService`:n `count_reference_pef`-metodia ja tallentaa sen kutsumalla `PefRepository`:n `create`-metodia. Tämän seurauksena käyttöliittymä päivittää näytettävän PEF-viitearvon kutsumalla omaa metodiaan `_update_reference_pef_ui()`.
+
+### Pef-seuranna täyttäminen
+
+Kun käyttäjä painaa **"PEF-seuranta"**-painiketta, käyttöliittymä näyttää mittaustietojen syöttökentät. Käyttäjä syöttää PEF-arvot (aamu/ilta, ennen/jälkeen lääkkeen) ja painaa joko **"Tallenna ja jatka"** tai **"Tallenna ja sulje"** -painiketta.
+
+Tallenna ja jatka
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant UI
+  participant PefService
+  participant PefMonitoringRepository
+  User->>+UI: click "PEF-seuranta"
+  UI->>UI: show input fields
+  User->>UI: fill fields + click "Tallenna ja jatka"
+  UI->>+PefService: add_value_to_monitoring(username, date, values...)
+  PefService->>+PefMonitoringRepository: add_value(PefMonitoring)
+  PefMonitoringRepository-->>-PefService: OK
+  PefService-->>-UI: return
+  UI->>+PefService: get_monitoring_by_username()
+  PefService->>PefMonitoringRepository: find_monitoring_by_username(username)
+  PefMonitoringRepository-->>PefService: monitoring rows
+  PefService->>PefMonitoringRepository: order_by_date(rows)
+  PefMonitoringRepository-->>PefService: ordered rows
+  PefService-->>-UI: updated list
+  UI->>UI: refresh monitoring view
+```
+
+- Jos käyttäjä painaa **"Tallenna ja jatka"**, [tapahtumankäsittelijä](https://github.com/JVilo/ot-harjoitustyo/blob/main/src/ui/pef_view.py) kutsuu sovelluslogiikan [add_value_to_monitoring](https://github.com/JVilo/ot-harjoitustyo/blob/06b2996b4d65a09ae0ea4328759d3530ffddbd76/src/services/pef_service.py#L164)-metodia. Uudet tiedot tallennetaan tietokantaan `PefMonitoringRepository`:n kautta. Tämän jälkeen käyttöliittymä päivitetään ja näytetään ajantasainen lista syötetyistä arvoista kutsumalla [get_monitoring_by_username](https://github.com/JVilo/ot-harjoitustyo/blob/06b2996b4d65a09ae0ea4328759d3530ffddbd76/src/services/pef_service.py#L171)-metodia.
+
+Tallenna ja sulje
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant UI
+  participant PefService
+  participant PefMonitoringRepository
+  User->>+UI: click "PEF-seuranta"
+  UI->>UI: show input fields
+  User->>UI: fill fields + click "Tallenna ja sulje"
+  UI->>+PefService: add_value_to_monitoring(username, date, values...)
+  PefService->>+PefMonitoringRepository: add_value(PefMonitoring)
+  PefMonitoringRepository-->>-PefService: OK
+  PefService-->>-UI: return
+  UI->>UI: hide monitoring section
+```
+- Jos käyttäjä painaa **"Tallenna ja sulje"**, tiedot tallennetaan samalla tavalla, mutta tämän jälkeen syöttökentät piilotetaan käyttöliittymästä eikä näkymää päivitetä uusilla arvoilla.
 
 ### Muut toiminnallisuudet
 
