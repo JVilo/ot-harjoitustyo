@@ -175,7 +175,7 @@ class PefService:
             self._user.username)
         ordered = self._pef_monitoring_repository.order_by_date(res)
         return ordered
-
+# not in use yet ->
     def calculate_monitoring_difference(self):
         over_20 = 0
         over_15 = 0
@@ -223,6 +223,7 @@ class PefService:
                 f'Bronkodilataatiovaste on ylittänyt diagnoosi rajan {over_15} kertaa!'
 
         return "Ei merkittäviä muutoksia pef-seurannassa"
+# <-
 
     def get_current_user(self):
         # returns the current logged-in user, or None if not logged in
