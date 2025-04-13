@@ -41,6 +41,7 @@ def create_tables(connection):
         """)
     connection.commit()
 
+
 def initialize_database():
 
     connection = get_database_connection()

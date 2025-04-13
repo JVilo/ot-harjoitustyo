@@ -57,21 +57,26 @@ class PefListView:
         greeting_text = f"Hi, {self._logged_in_user.username}!" if self._logged_in_user else "Hi, Guest!"
         self._greeting_var.set(greeting_text)
 
-        greeting_label = ttk.Label(self._header_frame, textvariable=self._greeting_var)
+        greeting_label = ttk.Label(
+            self._header_frame, textvariable=self._greeting_var)
         greeting_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
     def _initialize_logout_button(self):
         """Place logout button at the top-right corner."""
-        logout_button = ttk.Button(self._header_frame, text="Logout", command=self._logout)
-        logout_button.grid(row=0, column=1, padx=10, pady=10, sticky="e")  # Right-aligned in the top row
-        self._header_frame.grid_columnconfigure(1, weight=0)  # Keep column 1 for logout, don't stretch it
-        self._header_frame.grid_columnconfigure(0, weight=1)  # Allow column 0 to stretch (greeting label)
-
+        logout_button = ttk.Button(
+            self._header_frame, text="Logout", command=self._logout)
+        logout_button.grid(row=0, column=1, padx=10, pady=10,
+                           sticky="e")  # Right-aligned in the top row
+        # Keep column 1 for logout, don't stretch it
+        self._header_frame.grid_columnconfigure(1, weight=0)
+        # Allow column 0 to stretch (greeting label)
+        self._header_frame.grid_columnconfigure(0, weight=1)
 
     def _initialize_reference_label(self):
         """Initialize the reference label to display the reference PEF value."""
         self._reference_pef_var = StringVar(self._frame)  # Initialize it here
-        reference_pef_label = ttk.Label(self._left_panel, textvariable=self._reference_pef_var)
+        reference_pef_label = ttk.Label(
+            self._left_panel, textvariable=self._reference_pef_var)
         reference_pef_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
 
     def _update_reference_pef_ui(self):
@@ -219,7 +224,8 @@ class PefListView:
             text="Laske PEF-viitearvo",  # Button to start calculation
             command=self._recalculate_pef_handler  # Correct command for recalculation
         )
-        self._pef_reference_button.grid(row=3, column=0, padx=10, pady=10, sticky="w")
+        self._pef_reference_button.grid(
+            row=3, column=0, padx=10, pady=10, sticky="w")
 
     def _initialize_fields(self):
         """This method initializes the input fields (age, height, gender)."""
@@ -280,7 +286,8 @@ class PefListView:
             text="Laske vertailu",
             command=self._toggle_comparison_fields  # This should call the toggle function
         )
-        self._calculate_comparison_button.grid(row=1, column=0, padx=10, pady=10, sticky="w")
+        self._calculate_comparison_button.grid(
+            row=1, column=0, padx=10, pady=10, sticky="w")
 
     def _toggle_comparison_fields(self):
         """Shows or hides the fields for morning/evening PEF values and handles calculation."""
@@ -311,20 +318,29 @@ class PefListView:
             if self._evening_after_var is None:
                 self._evening_after_var = StringVar(self._frame)
 
-            print(f"morning_before_var initialized: {self._morning_before_var}")
+            print(
+                f"morning_before_var initialized: {self._morning_before_var}")
             print(f"morning_after_var initialized: {self._morning_after_var}")
 
             # Create labels for the input fields
-            self._morning_before_label = ttk.Label(master=self._frame, text="Aamun PEF ennen lääkettä (L/min)")
-            self._morning_after_label = ttk.Label(master=self._frame, text="Aamun PEF jälkeen lääkettä (L/min)")
-            self._evening_before_label = ttk.Label(master=self._frame, text="Illan PEF ennen lääkettä (L/min)")
-            self._evening_after_label = ttk.Label(master=self._frame, text="Illan PEF jälkeen lääkettä (L/min)")
+            self._morning_before_label = ttk.Label(
+                master=self._frame, text="Aamun PEF ennen lääkettä (L/min)")
+            self._morning_after_label = ttk.Label(
+                master=self._frame, text="Aamun PEF jälkeen lääkettä (L/min)")
+            self._evening_before_label = ttk.Label(
+                master=self._frame, text="Illan PEF ennen lääkettä (L/min)")
+            self._evening_after_label = ttk.Label(
+                master=self._frame, text="Illan PEF jälkeen lääkettä (L/min)")
 
             # Create entry fields for the PEF values
-            self._morning_before_entry = ttk.Entry(master=self._frame, textvariable=self._morning_before_var)
-            self._morning_after_entry = ttk.Entry(master=self._frame, textvariable=self._morning_after_var)
-            self._evening_before_entry = ttk.Entry(master=self._frame, textvariable=self._evening_before_var)
-            self._evening_after_entry = ttk.Entry(master=self._frame, textvariable=self._evening_after_var)
+            self._morning_before_entry = ttk.Entry(
+                master=self._frame, textvariable=self._morning_before_var)
+            self._morning_after_entry = ttk.Entry(
+                master=self._frame, textvariable=self._morning_after_var)
+            self._evening_before_entry = ttk.Entry(
+                master=self._frame, textvariable=self._evening_before_var)
+            self._evening_after_entry = ttk.Entry(
+                master=self._frame, textvariable=self._evening_after_var)
 
             # Grid the labels and entry fields
             self._morning_before_label.grid(padx=5, pady=5, sticky=constants.W)
@@ -337,7 +353,8 @@ class PefListView:
             self._evening_after_entry.grid(padx=5, pady=5, sticky=constants.W)
 
             # Create the "Calculate" button
-            self._calculate_button = ttk.Button(master=self._frame, text="Laske", command=self._calculate_comparison)
+            self._calculate_button = ttk.Button(
+                master=self._frame, text="Laske", command=self._calculate_comparison)
             self._calculate_button.grid(padx=5, pady=5, sticky=constants.W)
 
             # Create the result label to display comparison results
@@ -379,14 +396,20 @@ class PefListView:
                 print("Error: morning_after_var is None")
 
             # Get input values with validation
-            morning_before = self._safe_float_conversion(self._morning_before_var.get())
-            morning_after = self._safe_float_conversion(self._morning_after_var.get())
-            evening_before = self._safe_float_conversion(self._evening_before_var.get())
-            evening_after = self._safe_float_conversion(self._evening_after_var.get())
+            morning_before = self._safe_float_conversion(
+                self._morning_before_var.get())
+            morning_after = self._safe_float_conversion(
+                self._morning_after_var.get())
+            evening_before = self._safe_float_conversion(
+                self._evening_before_var.get())
+            evening_after = self._safe_float_conversion(
+                self._evening_after_var.get())
 
             # Debug: Print out the values being passed to the service
-            print(f"Morning Before: {morning_before}, Morning After: {morning_after}")
-            print(f"Evening Before: {evening_before}, Evening After: {evening_after}")
+            print(
+                f"Morning Before: {morning_before}, Morning After: {morning_after}")
+            print(
+                f"Evening Before: {evening_before}, Evening After: {evening_after}")
 
             # Calculate the differences using PefService
             results = self._pef_service.calculate_pef_differences(
@@ -430,7 +453,8 @@ class PefListView:
 
     def _create_pef_toggle_button(self):
         """Create only the toggle button, not the frame or its contents."""
-        self._toggle_button = ttk.Button(self._left_panel, text="Pef-seuranta", command=self._toggle_pef_section)
+        self._toggle_button = ttk.Button(
+            self._left_panel, text="Pef-seuranta", command=self._toggle_pef_section)
         self._toggle_button.grid(row=2, column=0, padx=10, pady=5, sticky="w")
 
         self._pef_frame = None
@@ -447,56 +471,71 @@ class PefListView:
                 self._create_pef_monitoring_section()  # Create inputs for the first time
                 self._pef_monitoring_section_created = True  # Mark as created
 
-            self._pef_frame.grid(row=1, column=0, padx=10, pady=10, sticky="ew")  # Show the frame
+            self._pef_frame.grid(row=1, column=0, padx=10,
+                                 pady=10, sticky="ew")  # Show the frame
             self._toggle_button.config(text="Piilota pef-seuranta")
 
     def _create_pef_monitoring_section(self):
         """Create the PEF monitoring section inputs."""
         # Date picker for the current date
-        self._date_label = ttk.Label(self._pef_frame, text="Valitse päivämäärä:")
+        self._date_label = ttk.Label(
+            self._pef_frame, text="Valitse päivämäärä:")
         self._date_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
 
-        self._calendar = Calendar(self._pef_frame, selectmode='day', date_pattern='yyyy-mm-dd')
+        self._calendar = Calendar(
+            self._pef_frame, selectmode='day', date_pattern='yyyy-mm-dd')
         self._calendar.grid(row=0, column=1, padx=5, pady=5, sticky="w")
-        self._calendar.selection_set(datetime.today().date())  # Set default date to today
+        # Set default date to today
+        self._calendar.selection_set(datetime.today().date())
 
         # Morning/Evening and Before/After medication dropdowns
-        self._time_of_day_label = ttk.Label(self._pef_frame, text="Aika päivästä (AAMU/ILTA):")
-        self._time_of_day_label.grid(row=1, column=0, padx=5, pady=5, sticky="w")
+        self._time_of_day_label = ttk.Label(
+            self._pef_frame, text="Aika päivästä (AAMU/ILTA):")
+        self._time_of_day_label.grid(
+            row=1, column=0, padx=5, pady=5, sticky="w")
 
-        self._time_of_day_dropdown = ttk.Combobox(self._pef_frame, values=["AAMU", "ILTA"])
+        self._time_of_day_dropdown = ttk.Combobox(
+            self._pef_frame, values=["AAMU", "ILTA"])
         self._time_of_day_dropdown.grid(row=1, column=1, padx=5, pady=5)
 
-        self._medication_label = ttk.Label(self._pef_frame, text="Ennen lääkettä tai lääkkeen jälkeen:")
-        self._medication_label.grid(row=2, column=0, padx=5, pady=5, sticky="w")
+        self._medication_label = ttk.Label(
+            self._pef_frame, text="Ennen lääkettä tai lääkkeen jälkeen:")
+        self._medication_label.grid(
+            row=2, column=0, padx=5, pady=5, sticky="w")
 
-        self._medication_dropdown = ttk.Combobox(self._pef_frame, values=["ENNNEN LÄÄKETÄ", "LÄÄKKEEN JÄLKEEN"])
+        self._medication_dropdown = ttk.Combobox(
+            self._pef_frame, values=["ENNNEN LÄÄKETÄ", "LÄÄKKEEN JÄLKEEN"])
         self._medication_dropdown.grid(row=2, column=1, padx=5, pady=5)
 
         # PEF values (3 fields for measurements)
-        self._pef_label = ttk.Label(self._pef_frame, text="Syötä PEF-arvot (L/min):")
+        self._pef_label = ttk.Label(
+            self._pef_frame, text="Syötä PEF-arvot (L/min):")
         self._pef_label.grid(row=3, column=0, padx=5, pady=5, sticky="w")
 
         self._pef_value_1_label = ttk.Label(self._pef_frame, text="PEF 1:")
-        self._pef_value_1_label.grid(row=4, column=0, padx=5, pady=5, sticky="w")
+        self._pef_value_1_label.grid(
+            row=4, column=0, padx=5, pady=5, sticky="w")
 
         self._pef_value_1_entry = ttk.Entry(self._pef_frame)
         self._pef_value_1_entry.grid(row=4, column=1, padx=5, pady=5)
 
         self._pef_value_2_label = ttk.Label(self._pef_frame, text="PEF 2:")
-        self._pef_value_2_label.grid(row=5, column=0, padx=5, pady=5, sticky="w")
+        self._pef_value_2_label.grid(
+            row=5, column=0, padx=5, pady=5, sticky="w")
 
         self._pef_value_2_entry = ttk.Entry(self._pef_frame)
         self._pef_value_2_entry.grid(row=5, column=1, padx=5, pady=5)
 
         self._pef_value_3_label = ttk.Label(self._pef_frame, text="PEF 3:")
-        self._pef_value_3_label.grid(row=6, column=0, padx=5, pady=5, sticky="w")
+        self._pef_value_3_label.grid(
+            row=6, column=0, padx=5, pady=5, sticky="w")
 
         self._pef_value_3_entry = ttk.Entry(self._pef_frame)
         self._pef_value_3_entry.grid(row=6, column=1, padx=5, pady=5)
 
         # Save buttons
-        self._save_button = ttk.Button(self._pef_frame, text="Tallenna ja sulje", command=self._save_and_close)
+        self._save_button = ttk.Button(
+            self._pef_frame, text="Tallenna ja sulje", command=self._save_and_close)
         self._save_button.grid(row=7, column=0, padx=5, pady=10)
 
         self._save_continue_button = ttk.Button(self._pef_frame, text="Tallenna ja jatka",
@@ -509,7 +548,8 @@ class PefListView:
         """Save the data and close the section."""
         self._save_pef_data()
         self._pef_frame.grid_forget()  # Hide the PEF monitoring section
-        self._toggle_button.config(text="Pef-seuranta")  # Reset the button text
+        self._toggle_button.config(
+            text="Pef-seuranta")  # Reset the button text
         self._populate_pef_data_table()
 
     def _save_and_continue(self):
@@ -527,7 +567,8 @@ class PefListView:
         value3 = self._pef_value_3_entry.get()  # Third PEF value
         state = self._medication_dropdown.get()  # Before or after medication
         time = self._time_of_day_dropdown.get()
-        print(f"Date: {date}, Value1: {value1}, Value2: {value2}, Value3: {value3}, State: {state}, Time: {time}")
+        print(
+            f"Date: {date}, Value1: {value1}, Value2: {value2}, Value3: {value3}, State: {state}, Time: {time}")
 
         self._pef_service.add_value_to_monitoring(date,
                                                   username,
@@ -541,12 +582,13 @@ class PefListView:
 
     def _clear_pef_inputs(self):
         """Clear all input fields for new data entry."""
-        self._calendar.selection_set(datetime.today().date())  # Reset calendar to today
+        self._calendar.selection_set(
+            datetime.today().date())  # Reset calendar to today
         self._time_of_day_dropdown.set('')  # Reset the time of day dropdown
         self._medication_dropdown.set('')  # Reset the medication dropdown
-        self._pef_value_1_entry.delete(0,END)  # Clear PEF value 1 field
-        self._pef_value_2_entry.delete(0,END)  # Clear PEF value 2 field
-        self._pef_value_3_entry.delete(0,END)  # Clear PEF value 3 field
+        self._pef_value_1_entry.delete(0, END)  # Clear PEF value 1 field
+        self._pef_value_2_entry.delete(0, END)  # Clear PEF value 2 field
+        self._pef_value_3_entry.delete(0, END)  # Clear PEF value 3 field
 
     def _create_pef_data_table(self):
         """Creates and populates the table to display saved PEF monitoring entries."""
@@ -557,8 +599,10 @@ class PefListView:
         # Define columns
         columns = ("date", "value1", "value2", "value3", "state", "time")
 
-        self._pef_table = ttk.Treeview(self._pef_frame, columns=columns, show="headings", height=5)
-        self._pef_table.grid(row=9, column=0, columnspan=2, sticky="nsew", pady=5)
+        self._pef_table = ttk.Treeview(
+            self._pef_frame, columns=columns, show="headings", height=5)
+        self._pef_table.grid(row=9, column=0, columnspan=2,
+                             sticky="nsew", pady=5)
 
         # Define headings
         self._pef_table.heading("date", text="Päivämäärä")
@@ -598,7 +642,8 @@ class PefListView:
 
         # HEADER FRAME
         self._header_frame = ttk.Frame(self._frame)
-        self._header_frame.grid(row=0, column=0, columnspan=2, sticky="ew", padx=10, pady=10)
+        self._header_frame.grid(
+            row=0, column=0, columnspan=2, sticky="ew", padx=10, pady=10)
         self._header_frame.grid_columnconfigure(0, weight=1)
         self._header_frame.grid_columnconfigure(1, weight=0)
 
@@ -607,7 +652,8 @@ class PefListView:
 
         # CONTENT FRAME
         self._content_frame = ttk.Frame(self._frame)
-        self._content_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+        self._content_frame.grid(
+            row=1, column=0, sticky="nsew", padx=10, pady=10)
         self._content_frame.grid_columnconfigure(0, weight=0)  # Left panel
         self._content_frame.grid_columnconfigure(1, weight=1)  # Center panel
         self._content_frame.grid_rowconfigure(0, weight=1)
@@ -627,7 +673,6 @@ class PefListView:
         self._initialize_pef_reference_button()  # Näytä/Peitä PEF-viite
         self._initialize_comparison_button()  # Näytä/Peitä vertailu
         self._create_pef_toggle_button()  # Näytä/Peitä seuranta
-
 
         # Placeholder frames for toggleable sections
         self._reference_section = ttk.Frame(self._center_panel)

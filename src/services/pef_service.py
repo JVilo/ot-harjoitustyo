@@ -63,11 +63,11 @@ class PefService:
 
         if gender == "male" and age >= 16:
             height_in_m = height / 100
-            reference_pef = (((height_in_m * 5.48) + 1.58) - (age * 0.041)) * 60
+            reference_pef = (((height_in_m * 5.48) + 1.58) -
+                             (age * 0.041)) * 60
             ref_pef = Pef(value=reference_pef, user=self._user)
             self._pef_repository.create(ref_pef)
             # print(f"Saving reference PEF: {reference_pef} for user: {user.username}")
-            return reference_pef
 
         if gender == "female" and age >= 16:
             height_in_m = height / 100
@@ -75,14 +75,14 @@ class PefService:
             ref_pef = Pef(value=reference_pef, user=self._user)
             self._pef_repository.create(ref_pef)
             # print(f"Saving reference PEF: {reference_pef} for user: {user.username}")
-            return reference_pef
 
         if age < 16:
             reference_pef = ((height - 100) * 5) + 100
             ref_pef = Pef(value=reference_pef, user=self._user)
             self._pef_repository.create(ref_pef)
             # print(f"Saving reference PEF: {reference_pef} for user: {user.username}")
-            return reference_pef
+
+        return reference_pef
 
     def login(self, username, password):
         # logs in the user if the username and password match
@@ -160,8 +160,8 @@ class PefService:
             "before_after_diff_evening": before_after_diff_evening,
             "warning_message": warning_message
         }
-# No Ui functionality yet ->
-    def add_value_to_monitoring(self,username, date,
+
+    def add_value_to_monitoring(self, date, username,
                                 value1, value2, value3, state, time):
 
         pef_m = self._pef_monitoring_repository.add_value(PefMonitoring(
@@ -171,14 +171,16 @@ class PefService:
     def get_monitoring_by_username(self):
         if not self._user:
             return None
-        all = self._pef_monitoring_repository.find_monitoring_by_username(self._user.username)
-        ordered = self._pef_monitoring_repository.order_by_date(all)
+        res = self._pef_monitoring_repository.find_monitoring_by_username(
+            self._user.username)
+        ordered = self._pef_monitoring_repository.order_by_date(res)
         return ordered
 
     def calculate_monitoring_difference(self):
         over_20 = 0
         over_15 = 0
-        pefs = self.get_monitoring_by_username()  # Get all monitoring data for the user
+        # Get all monitoring data for the user
+        pefs = self.get_monitoring_by_username()
         current_day = None
 
         # Loop through all the rows for the user, sorted by date
@@ -218,11 +220,10 @@ class PefService:
             return f'Bronkodilataatiovaste on ylittänyt diagnoosi rajan {over_15} kertaa!'
         if over_20 >= 3 and over_15 >= 3:
             return f'Vuorokausi vaihtelu on ylittänyt diagnoosi rajan {over_20} kertaa!' \
-                   f'Bronkodilataatiovaste on ylittänyt diagnoosi rajan {over_15} kertaa!'
+                f'Bronkodilataatiovaste on ylittänyt diagnoosi rajan {over_15} kertaa!'
 
         return "Ei merkittäviä muutoksia pef-seurannassa"
 
-# <-
     def get_current_user(self):
         # returns the current logged-in user, or None if not logged in
         return self._user
