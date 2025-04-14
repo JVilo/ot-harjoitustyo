@@ -166,10 +166,10 @@ sequenceDiagram
   PefMonitoringRepository-->>-PefService: OK
   PefService-->>-UI: return
   UI->>+PefService: get_monitoring_by_username()
-  PefService->>PefMonitoringRepository: find_monitoring_by_username(username)
+  PefService->>+PefMonitoringRepository: find_monitoring_by_username(username)
   PefMonitoringRepository-->>PefService: monitoring rows
   PefService->>PefMonitoringRepository: order_by_date(rows)
-  PefMonitoringRepository-->>PefService: ordered rows
+  PefMonitoringRepository-->>-PefService: ordered rows
   PefService-->>-UI: updated list
   UI->>UI: refresh monitoring view
 ```
