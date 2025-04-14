@@ -1,7 +1,6 @@
 class PefMonitoring:
-    def __init__(self,
-                 username, date, value1,
-                 value2, value3, state, time):
+    def __init__(self, username, date, value1,
+                 value2, value3, state, time,):
         self.username = username
         self.date = date
         self.value1 = value1

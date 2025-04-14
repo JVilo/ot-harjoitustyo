@@ -296,6 +296,7 @@ class PefListView:
             print("Initializing comparison fields...")  # Debugging line
             # Initialize fields for comparison
             self._initialize_comparison_fields()
+            self._comparison_frame.grid()
             self._calculate_comparison_button.config(text="Sulje vertailu")
         else:
             print("Hiding comparison fields...")  # Debugging line
@@ -310,61 +311,63 @@ class PefListView:
 
             # Only initialize if they haven't been initialized already
             if self._morning_before_var is None:
-                self._morning_before_var = StringVar(self._frame)
+                self._morning_before_var = StringVar(self._comparison_frame)
             if self._morning_after_var is None:
-                self._morning_after_var = StringVar(self._frame)
+                self._morning_after_var = StringVar(self._comparison_frame)
             if self._evening_before_var is None:
-                self._evening_before_var = StringVar(self._frame)
+                self._evening_before_var = StringVar(self._comparison_frame)
             if self._evening_after_var is None:
-                self._evening_after_var = StringVar(self._frame)
+                self._evening_after_var = StringVar(self._comparison_frame)
 
-            print(
-                f"morning_before_var initialized: {self._morning_before_var}")
+            print(f"morning_before_var initialized: {self._morning_before_var}")
             print(f"morning_after_var initialized: {self._morning_after_var}")
 
             # Create labels for the input fields
             self._morning_before_label = ttk.Label(
-                master=self._frame, text="Aamun PEF ennen lääkettä (L/min)")
+                master=self._comparison_frame, text="Aamun PEF ennen lääkettä (L/min)")
             self._morning_after_label = ttk.Label(
-                master=self._frame, text="Aamun PEF jälkeen lääkettä (L/min)")
+                master=self._comparison_frame, text="Aamun PEF jälkeen lääkettä (L/min)")
             self._evening_before_label = ttk.Label(
-                master=self._frame, text="Illan PEF ennen lääkettä (L/min)")
+                master=self._comparison_frame, text="Illan PEF ennen lääkettä (L/min)")
             self._evening_after_label = ttk.Label(
-                master=self._frame, text="Illan PEF jälkeen lääkettä (L/min)")
+                master=self._comparison_frame, text="Illan PEF jälkeen lääkettä (L/min)")
 
             # Create entry fields for the PEF values
             self._morning_before_entry = ttk.Entry(
-                master=self._frame, textvariable=self._morning_before_var)
+                master=self._comparison_frame, textvariable=self._morning_before_var)
             self._morning_after_entry = ttk.Entry(
-                master=self._frame, textvariable=self._morning_after_var)
+                master=self._comparison_frame, textvariable=self._morning_after_var)
             self._evening_before_entry = ttk.Entry(
-                master=self._frame, textvariable=self._evening_before_var)
+                master=self._comparison_frame, textvariable=self._evening_before_var)
             self._evening_after_entry = ttk.Entry(
-                master=self._frame, textvariable=self._evening_after_var)
+                master=self._comparison_frame, textvariable=self._evening_after_var)
 
-            # Grid the labels and entry fields
-            self._morning_before_label.grid(padx=5, pady=5, sticky=constants.W)
-            self._morning_before_entry.grid(padx=5, pady=5, sticky=constants.W)
-            self._morning_after_label.grid(padx=5, pady=5, sticky=constants.W)
-            self._morning_after_entry.grid(padx=5, pady=5, sticky=constants.W)
-            self._evening_before_label.grid(padx=5, pady=5, sticky=constants.W)
-            self._evening_before_entry.grid(padx=5, pady=5, sticky=constants.W)
-            self._evening_after_label.grid(padx=5, pady=5, sticky=constants.W)
-            self._evening_after_entry.grid(padx=5, pady=5, sticky=constants.W)
+            # Grid the labels and entry fields inside the comparison frame
+            self._morning_before_label.grid(row=0, column=0, padx=5, pady=5, sticky=constants.W)
+            self._morning_before_entry.grid(row=0, column=1, padx=5, pady=5, sticky=constants.W)
+
+            self._morning_after_label.grid(row=1, column=0, padx=5, pady=5, sticky=constants.W)
+            self._morning_after_entry.grid(row=1, column=1, padx=5, pady=5, sticky=constants.W)
+
+            self._evening_before_label.grid(row=2, column=0, padx=5, pady=5, sticky=constants.W)
+            self._evening_before_entry.grid(row=2, column=1, padx=5, pady=5, sticky=constants.W)
+
+            self._evening_after_label.grid(row=3, column=0, padx=5, pady=5, sticky=constants.W)
+            self._evening_after_entry.grid(row=3, column=1, padx=5, pady=5, sticky=constants.W)
 
             # Create the "Calculate" button
             self._calculate_button = ttk.Button(
-                master=self._frame, text="Laske", command=self._calculate_comparison)
-            self._calculate_button.grid(padx=5, pady=5, sticky=constants.W)
+                master=self._comparison_frame, text="Laske", command=self._calculate_comparison)
+            self._calculate_button.grid(row=4, column=0, columnspan=2, padx=5, pady=10, sticky=constants.W)
 
             # Create the result label to display comparison results
-            self._comparison_result_var = StringVar(self._frame)
+            self._comparison_result_var = StringVar(self._comparison_frame)
             self._comparison_result_label = ttk.Label(
-                master=self._frame,
+                master=self._comparison_frame,
                 textvariable=self._comparison_result_var,
                 foreground="green"
             )
-            self._comparison_result_label.grid(padx=5, pady=5)
+            self._comparison_result_label.grid(row=5, column=0, columnspan=2, padx=5, pady=5, sticky=constants.W)
 
             self.fields_initialized = True
             print("Comparison fields initialized successfully.")
@@ -473,6 +476,7 @@ class PefListView:
 
             self._pef_frame.grid(row=1, column=0, padx=10,
                                  pady=10, sticky="ew")  # Show the frame
+            self._populate_pef_data_table()
             self._toggle_button.config(text="Piilota pef-seuranta")
 
     def _create_pef_monitoring_section(self):
@@ -504,7 +508,7 @@ class PefListView:
             row=2, column=0, padx=5, pady=5, sticky="w")
 
         self._medication_dropdown = ttk.Combobox(
-            self._pef_frame, values=["ENNNEN LÄÄKETÄ", "LÄÄKKEEN JÄLKEEN"])
+            self._pef_frame, values=["ENNEN LÄÄKETTÄ", "LÄÄKKEEN JÄLKEEN"])
         self._medication_dropdown.grid(row=2, column=1, padx=5, pady=5)
 
         # PEF values (3 fields for measurements)
@@ -555,8 +559,8 @@ class PefListView:
     def _save_and_continue(self):
         """Save the data and clear the fields for the next input."""
         self._save_pef_data()
-        self._clear_pef_inputs()
         self._populate_pef_data_table()
+        self._clear_pef_inputs()
 
     def _save_pef_data(self):
         """Collect and store the PEF monitoring data."""
@@ -624,6 +628,7 @@ class PefListView:
             self._pef_table.delete(row)
 
         data = self._pef_service.get_monitoring_by_username()
+        print("DEBUG: Retrieved data:", data)
         if not data:
             return
 

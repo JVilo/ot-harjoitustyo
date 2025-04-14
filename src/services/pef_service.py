@@ -162,10 +162,11 @@ class PefService:
         }
 
     def add_value_to_monitoring(self, date, username,
-                                value1, value2, value3, state, time):
+                            value1, value2, value3, state, time):
 
         pef_m = self._pef_monitoring_repository.add_value(PefMonitoring(
-            date, username, value1, value2, value3, state, time))
+            username, date, value1, value2, value3, state, time
+        ))
         return pef_m
 
     def get_monitoring_by_username(self):
@@ -173,55 +174,82 @@ class PefService:
             return None
         res = self._pef_monitoring_repository.find_monitoring_by_username(
             self._user.username)
-        ordered = self._pef_monitoring_repository.order_by_date(res)
-        return ordered
+        return self._pef_monitoring_repository.order_by_date(res)
 # not in use yet ->
     def calculate_monitoring_difference(self):
-        over_20 = 0
-        over_15 = 0
-        # Get all monitoring data for the user
+        thresholds = {"over_20": 0, "over_15": 0}
         pefs = self.get_monitoring_by_username()
         current_day = None
 
-        # Loop through all the rows for the user, sorted by date
+        daily_values = self._reset_daily_values()
+
         for values in pefs:
             if current_day != values.date:
-                # We're on a new day, reset the daily values
                 current_day = values.date
-                max_m = max_m_p = max_e = max_e_p = None  # Reset max values for the day
+                daily_values = self._reset_daily_values()
 
-            # Process values based on state and time
-            if values.state == 'ENNNEN LÄÄKETÄ' and values.time == 'AAMU':
-                max_m = max(values.value1, values.value2, values.value3)
-            elif values.state == 'LÄÄKKEEN JÄLKEEN' and values.time == 'AAMU':
-                max_m_p = max(values.value1, values.value2, values.value3)
-            elif values.state == 'ENNNEN LÄÄKETÄ' and values.time == 'ILTA':
-                max_e = max(values.value1, values.value2, values.value3)
-            elif values.state == 'LÄÄKKEEN JÄLKEEN' and values.time == 'ILTA':
-                max_e_p = max(values.value1, values.value2, values.value3)
+            self._assign_max_value(values, daily_values)
 
-                # Once we have all values for the day, calculate the differences
-                if (max_m is not None and max_m_p is not None
-                        and max_e is not None and max_e_p is not None):
-                    prosm = ((max_m_p - max_m) / max_m) * 100
-                    prose = ((max_e_p - max_e) / max_e) * 100
-                    pros_d = ((max_m - max_e) / max_m) * 100
+            if all(daily_values.values()):
+                prosm, prose, pros_d = self._calculate_day_differences(
+                    daily_values["max_m"],
+                    daily_values["max_m_p"],
+                    daily_values["max_e"],
+                    daily_values["max_e_p"]
+                )
+                thresholds = self._update_thresholds(prosm, prose, pros_d, thresholds)
 
-                    # Check if thresholds are exceeded
-                    if prosm >= 15 or prose >= 15:
-                        over_15 += 1
-                    if pros_d >= 20:
-                        over_20 += 1
+        return self._build_monitoring_summary(
+            thresholds["over_20"], thresholds["over_15"]
+        )
 
-        # Return results based on thresholds exceeded
+    def _reset_daily_values(self):
+        return {
+            "max_m": None,
+            "max_m_p": None,
+            "max_e": None,
+            "max_e_p": None
+        }
+
+    def _assign_max_value(self, values, daily_values):
+        max_val = self._get_max_value(values)
+        if values.state == 'ENNEN LÄÄKETTÄ':
+            if values.time == 'AAMU':
+                daily_values["max_m"] = max_val
+            elif values.time == 'ILTA':
+                daily_values["max_e"] = max_val
+        elif values.state == 'LÄÄKKEEN JÄLKEEN':
+            if values.time == 'AAMU':
+                daily_values["max_m_p"] = max_val
+            elif values.time == 'ILTA':
+                daily_values["max_e_p"] = max_val
+
+    def _get_max_value(self, values):
+        return max(values.value1, values.value2, values.value3)
+
+    def _calculate_day_differences(self, max_m, max_m_p, max_e, max_e_p):
+        prosm = ((max_m_p - max_m) / max_m) * 100
+        prose = ((max_e_p - max_e) / max_e) * 100
+        pros_d = ((max_m - max_e) / max_m) * 100
+        return prosm, prose, pros_d
+
+    def _update_thresholds(self, prosm, prose, pros_d, thresholds):
+        if prosm >= 15 or prose >= 15:
+            thresholds["over_15"] += 1
+        if pros_d >= 20:
+            thresholds["over_20"] += 1
+        return thresholds
+
+    def _build_monitoring_summary(self, over_20, over_15):
+        if over_20 >= 3 and over_15 >= 3:
+            return (
+                f'Vuorokausi vaihtelu on ylittänyt diagnoosi rajan {over_20} kertaa!\n'
+                f'Bronkodilataatiovaste on ylittänyt diagnoosi rajan {over_15} kertaa!'
+            )
         if over_20 >= 3:
             return f'Vuorokausi vaihtelu on ylittänyt diagnoosi rajan {over_20} kertaa!'
         if over_15 >= 3:
             return f'Bronkodilataatiovaste on ylittänyt diagnoosi rajan {over_15} kertaa!'
-        if over_20 >= 3 and over_15 >= 3:
-            return f'Vuorokausi vaihtelu on ylittänyt diagnoosi rajan {over_20} kertaa!' \
-                f'Bronkodilataatiovaste on ylittänyt diagnoosi rajan {over_15} kertaa!'
-
         return "Ei merkittäviä muutoksia pef-seurannassa"
 # <-
 
