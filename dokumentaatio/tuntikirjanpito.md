@@ -37,3 +37,4 @@
 | 13.4. |   2   | Käyttöliittymän ulkkonäon mjärjestäminen/siistiminen.                                                    |
 |       |   1   | Testejä listätty uusiin tiedostoihin mm. pef-seurannan osuuteen.                                         |
 |       |   1   | Arkitehtuuri dokumentin päivittäminen, sovelluksen testaaminen.                                          |
+| 14.4. |   2   | Koodin debuggaus ja refaktorointi, kirjoitusvirheiden korjausta testi näkumiin. |
