@@ -1,4 +1,4 @@
-from tkinter import ttk, StringVar, constants, END
+from tkinter import ttk, StringVar, constants, END, messagebox
 from tkcalendar import Calendar
 from datetime import datetime
 from services.pef_service import pef_service
@@ -27,7 +27,13 @@ class PefListView:
         self._handle_logout = handle_logout
         self._reference_pef_var = StringVar()
         self._morning_before_var = StringVar()
+        self._vcmd = self._root.register(self.validate_pef_input)
 
+        self._entry = ttk.Entry(
+            self._frame,
+            validate="key",
+            validatecommand=(self._vcmd, '%P')
+        )
         self._pef_reference_button = None  # Button to trigger PEF reference calculation
         self.fields_initialized = False  # Flag to track if fields are initialized
         self._pef_service = pef_service
@@ -50,6 +56,14 @@ class PefListView:
 
     def destroy(self):
         self._frame.destroy()
+
+    def validate_pef_input(self, new_value):
+        print(f"Validating: '{new_value}'")  # Debug output
+        if new_value == "":
+            return True
+        if new_value.isdigit() and len(new_value) <= 3:
+            return True
+        return False
 
     def _initialize_greeting_label(self):
         """Initialize the greeting label to show the user's name."""
@@ -481,6 +495,10 @@ class PefListView:
 
     def _create_pef_monitoring_section(self):
         """Create the PEF monitoring section inputs."""
+
+        # Register validation for PEF fields
+        vcmd_pef = self._root.register(self.validate_pef_input)
+
         # Date picker for the current date
         self._date_label = ttk.Label(
             self._pef_frame, text="Valitse päivämäärä:")
@@ -489,26 +507,23 @@ class PefListView:
         self._calendar = Calendar(
             self._pef_frame, selectmode='day', date_pattern='yyyy-mm-dd')
         self._calendar.grid(row=0, column=1, padx=5, pady=5, sticky="w")
-        # Set default date to today
         self._calendar.selection_set(datetime.today().date())
 
         # Morning/Evening and Before/After medication dropdowns
         self._time_of_day_label = ttk.Label(
             self._pef_frame, text="Aika päivästä (AAMU/ILTA):")
-        self._time_of_day_label.grid(
-            row=1, column=0, padx=5, pady=5, sticky="w")
+        self._time_of_day_label.grid(row=1, column=0, padx=5, pady=5, sticky="w")
 
         self._time_of_day_dropdown = ttk.Combobox(
-            self._pef_frame, values=["AAMU", "ILTA"])
+            self._pef_frame, values=["AAMU", "ILTA"],state="readonly")
         self._time_of_day_dropdown.grid(row=1, column=1, padx=5, pady=5)
 
         self._medication_label = ttk.Label(
             self._pef_frame, text="Ennen lääkettä tai lääkkeen jälkeen:")
-        self._medication_label.grid(
-            row=2, column=0, padx=5, pady=5, sticky="w")
+        self._medication_label.grid(row=2, column=0, padx=5, pady=5, sticky="w")
 
         self._medication_dropdown = ttk.Combobox(
-            self._pef_frame, values=["ENNEN LÄÄKETTÄ", "LÄÄKKEEN JÄLKEEN"])
+            self._pef_frame, values=["ENNEN LÄÄKETTÄ", "LÄÄKKEEN JÄLKEEN"],state="readonly")
         self._medication_dropdown.grid(row=2, column=1, padx=5, pady=5)
 
         # PEF values (3 fields for measurements)
@@ -517,24 +532,24 @@ class PefListView:
         self._pef_label.grid(row=3, column=0, padx=5, pady=5, sticky="w")
 
         self._pef_value_1_label = ttk.Label(self._pef_frame, text="PEF 1:")
-        self._pef_value_1_label.grid(
-            row=4, column=0, padx=5, pady=5, sticky="w")
+        self._pef_value_1_label.grid(row=4, column=0, padx=5, pady=5, sticky="w")
 
-        self._pef_value_1_entry = ttk.Entry(self._pef_frame)
+        self._pef_value_1_entry = ttk.Entry(self._pef_frame, validate="key",
+                                            validatecommand=(vcmd_pef, '%P'))
         self._pef_value_1_entry.grid(row=4, column=1, padx=5, pady=5)
 
         self._pef_value_2_label = ttk.Label(self._pef_frame, text="PEF 2:")
-        self._pef_value_2_label.grid(
-            row=5, column=0, padx=5, pady=5, sticky="w")
+        self._pef_value_2_label.grid(row=5, column=0, padx=5, pady=5, sticky="w")
 
-        self._pef_value_2_entry = ttk.Entry(self._pef_frame)
+        self._pef_value_2_entry = ttk.Entry(self._pef_frame, validate="key",
+                                            validatecommand=(vcmd_pef, '%P'))
         self._pef_value_2_entry.grid(row=5, column=1, padx=5, pady=5)
 
         self._pef_value_3_label = ttk.Label(self._pef_frame, text="PEF 3:")
-        self._pef_value_3_label.grid(
-            row=6, column=0, padx=5, pady=5, sticky="w")
+        self._pef_value_3_label.grid(row=6, column=0, padx=5, pady=5, sticky="w")
 
-        self._pef_value_3_entry = ttk.Entry(self._pef_frame)
+        self._pef_value_3_entry = ttk.Entry(self._pef_frame, validate="key",
+                                            validatecommand=(vcmd_pef, '%P'))
         self._pef_value_3_entry.grid(row=6, column=1, padx=5, pady=5)
 
         # Save buttons
@@ -573,6 +588,10 @@ class PefListView:
         time = self._time_of_day_dropdown.get()
         print(
             f"Date: {date}, Value1: {value1}, Value2: {value2}, Value3: {value3}, State: {state}, Time: {time}")
+
+        if not all([value1, value2, value3, state, time]):
+            messagebox.showerror("Virhe", "Kaikki kentät on täytettävä.")
+            return
 
         self._pef_service.add_value_to_monitoring(date,
                                                   username,
