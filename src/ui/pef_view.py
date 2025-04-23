@@ -322,6 +322,7 @@ class PefListView:
         try:
             """Initialize the fields for entering morning and evening PEF values."""
             print("Initializing comparison fields...")  # Debugging line
+            vcmd_pef = self._root.register(self.validate_pef_input)
 
             # Only initialize if they haven't been initialized already
             if self._morning_before_var is None:
@@ -348,13 +349,17 @@ class PefListView:
 
             # Create entry fields for the PEF values
             self._morning_before_entry = ttk.Entry(
-                master=self._comparison_frame, textvariable=self._morning_before_var)
+                master=self._comparison_frame, textvariable=self._morning_before_var, validate="key",
+                validatecommand=(vcmd_pef, '%P'))
             self._morning_after_entry = ttk.Entry(
-                master=self._comparison_frame, textvariable=self._morning_after_var)
+                master=self._comparison_frame, textvariable=self._morning_after_var, validate="key",
+                validatecommand=(vcmd_pef, '%P'))
             self._evening_before_entry = ttk.Entry(
-                master=self._comparison_frame, textvariable=self._evening_before_var)
+                master=self._comparison_frame, textvariable=self._evening_before_var, validate="key",
+                validatecommand=(vcmd_pef, '%P'))
             self._evening_after_entry = ttk.Entry(
-                master=self._comparison_frame, textvariable=self._evening_after_var)
+                master=self._comparison_frame, textvariable=self._evening_after_var, validate="key",
+                validatecommand=(vcmd_pef, '%P'))
 
             # Grid the labels and entry fields inside the comparison frame
             self._morning_before_label.grid(row=0, column=0, padx=5, pady=5, sticky=constants.W)
@@ -408,9 +413,6 @@ class PefListView:
         """Calculate and show the differences between morning/evening PEF and before/after medication."""
         print("Calculate Comparison Button Pressed")
         try:
-            # Check if the fields are initialized correctly
-            if self._morning_after_var is None:
-                print("Error: morning_after_var is None")
 
             # Get input values with validation
             morning_before = self._safe_float_conversion(
@@ -421,6 +423,21 @@ class PefListView:
                 self._evening_before_var.get())
             evening_after = self._safe_float_conversion(
                 self._evening_after_var.get())
+
+            def validate_pef_value(value_str):
+                """Validate PEF value if present."""
+                if value_str is None:
+                    return None  # Allow empty or invalid values (already handled by _safe_float_conversion)
+                if 10 <= value_str <= 999:
+                    return value_str
+                else:
+                    messagebox.showerror("Virhe", "PEF-arvon tulee olla välillä 10–999.")
+                    return None
+
+            morning_before = validate_pef_value(morning_before)
+            morning_after = validate_pef_value(morning_after)
+            evening_before = validate_pef_value(evening_before)
+            evening_after = validate_pef_value(evening_after)
 
             # Debug: Print out the values being passed to the service
             print(
@@ -591,6 +608,17 @@ class PefListView:
 
         if not all([value1, value2, value3, state, time]):
             messagebox.showerror("Virhe", "Kaikki kentät on täytettävä.")
+            return
+
+        # Check if all values are digits and within the valid range
+        try:
+            val1 = int(value1)
+            val2 = int(value2)
+            val3 = int(value3)
+            if not (10 <= val1 <= 999 and 10 <= val2 <= 999 and 10 <= val3 <= 999):
+                raise ValueError
+        except ValueError:
+            messagebox.showerror("Virhe", "PEF-arvojen tulee olla numeroita välillä 10–999.")
             return
 
         self._pef_service.add_value_to_monitoring(date,
