@@ -38,3 +38,5 @@
 |       |   1   | Testejä listätty uusiin tiedostoihin mm. pef-seurannan osuuteen.                                         |
 |       |   1   | Arkitehtuuri dokumentin päivittäminen, sovelluksen testaaminen.                                          |
 | 14.4. |   2   | Koodin debuggaus ja refaktorointi, kirjoitusvirheiden korjausta testi näkumiin. |
+| 23.4. |   2   | Validointien lisääminen input kenttiin. |
+|       |   2   | Käyttöliittymän ulkonäin ja viitearvo nappin toiminnan muokkaaminen. |

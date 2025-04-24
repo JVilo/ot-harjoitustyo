@@ -127,8 +127,17 @@ class PefListView:
         try:
             # Get user inputs
             age = int(self._age_var.get())  # Get the age from the dropdown
-            # Get the height from the text entry
-            height = float(self._height_var.get())
+            height_input = self._height_var.get()
+            # Validate height
+            try:
+                height = float(height_input)
+            except ValueError:
+                messagebox.showerror(title= "Virhe", message="Pituuden tulee olla numero.")
+                return
+
+            if height < 85 or height > 272:
+                messagebox.showerror(title= "Virhe", message="Pituuden tulee olla välillä 100–272 cm.")
+                return
             gender = self._gender_var.get()  # Get the gender value (male or female)
 
             # Call the method to calculate the reference PEF value
@@ -154,10 +163,10 @@ class PefListView:
 
             # Show the recalculate button and re-enable it
             self._initialize_pef_reference_button()
+            self.fields_initialized = False
 
         except ValueError:
-            # If the user input is not valid, show an error message
-            self._show_error("Ole hyvä ja täytä pituus ja ikä!")
+            self._show_error("An error occurred while calculating.")
 
     def _recalculate_pef_handler(self):
         """Handler for recalculating the reference PEF."""
@@ -183,7 +192,7 @@ class PefListView:
         self._calculate_button.config(state=constants.NORMAL)
 
         # Reset the fields for the next calculation
-        self.fields_initialized = False  # Reset the flag for new calculation
+        self.fields_initialized = True  # Reset the flag for new calculation
 
     def _show_error(self, message):
         self._error_variable.set(message)
@@ -195,51 +204,63 @@ class PefListView:
     def _initialize_age_dropdown(self):
         # Ensure age dropdown is initialized
         self._age_label = ttk.Label(
-            master=self._frame, text="Ikä (vuosina)")  # Label for age
-        self._age_var = StringVar(self._frame)
+            master=self._reference_section, text="Ikä (vuosina)")  # Label for age
+        self._age_var = StringVar()
         # Age dropdown from 5 to 99
         age_options = [str(i) for i in range(5, 100)]
         self._age_var.set(age_options[0])  # Default age
 
         self._age_dropdown = ttk.Combobox(
-            master=self._frame, textvariable=self._age_var, values=age_options, state="readonly")
+            master=self._reference_section, textvariable=self._age_var, values=age_options, state="readonly")
         self._age_label.grid(padx=5, pady=5, sticky=constants.W)
         self._age_dropdown.grid(padx=5, pady=5, sticky=constants.EW)
 
     def _initialize_height_field(self):
         self._height_label = ttk.Label(
-            master=self._frame, text="Pituus (cm)")  # Label for height
-        self._height_var = StringVar(self._frame)
+            master=self._reference_section, text="Pituus (cm)")  # Label for height
+        self._height_var = StringVar()
 
         self._height_entry = ttk.Entry(
-            master=self._frame, textvariable=self._height_var)
+            master=self._reference_section, textvariable=self._height_var)
         self._height_label.grid(padx=5, pady=5, sticky=constants.W)
         self._height_entry.grid(padx=5, pady=5, sticky=constants.EW)
 
     def _initialize_gender_checkboxes(self):
         self._gender_label = ttk.Label(
-            master=self._frame, text="Sukupuoli")  # Label for gender
-        self._gender_var = StringVar(self._frame)
+            master=self._reference_section, text="Sukupuoli")  # Label for gender
+        self._gender_var = StringVar()
         self._gender_var.set("")  # Default to empty value
 
         self._male_checkbox = ttk.Radiobutton(
-            master=self._frame, text="Mies", variable=self._gender_var, value="male")
+            master=self._reference_section, text="Mies", variable=self._gender_var, value="male")
         self._female_checkbox = ttk.Radiobutton(
-            master=self._frame, text="Nainen", variable=self._gender_var, value="female")
+            master=self._reference_section, text="Nainen", variable=self._gender_var, value="female")
 
         self._gender_label.grid(padx=5, pady=5, sticky=constants.W)
         self._male_checkbox.grid(padx=5, pady=5, sticky=constants.W)
         self._female_checkbox.grid(padx=5, pady=5, sticky=constants.W)
 
     def _initialize_pef_reference_button(self):
-        """Initializes the button to calculate PEF reference."""
+        """Initializes the button to show/hide PEF reference calculation."""
         self._pef_reference_button = ttk.Button(
             master=self._left_panel,
-            text="Laske PEF-viitearvo",  # Button to start calculation
-            command=self._recalculate_pef_handler  # Correct command for recalculation
+            text="Laske PEF-viitearvo",
+            command=self._toggle_reference_section  # This now toggles the view
         )
         self._pef_reference_button.grid(
             row=3, column=0, padx=10, pady=10, sticky="w")
+
+    def _toggle_reference_section(self):
+        """Toggles visibility of the PEF reference calculation section."""
+        if self._reference_section.winfo_ismapped():
+            self._reference_section.grid_remove()
+            self._pef_reference_button.config(text="Laske PEF-viitearvo")
+        else:
+            self._reference_section.grid()
+            self._initialize_fields()  # Ensure fields are shown in the section
+            self._pef_reference_button.config(text="Sulje PEF-viitearvo")
+
+        self._pef_reference_button.config(state=constants.NORMAL)
 
     def _initialize_fields(self):
         """This method initializes the input fields (age, height, gender)."""
@@ -277,7 +298,7 @@ class PefListView:
     def _initialize_calculate_button(self):
         """Initializes the 'Laske' button."""
         self._calculate_button = ttk.Button(
-            master=self._frame,
+            master=self._reference_section,
             text="Laske",
             state=constants.DISABLED,  # Initially disabled
             command=self._calculate_pef_handler  # Button action to calculate PEF
