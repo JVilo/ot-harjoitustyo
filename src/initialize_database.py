@@ -9,8 +9,11 @@ def drop_tables(connection):
         drop table if exists users;
     """)
     cursor.execute("""
-            drop table if exists pef_monitoring;
-        """)
+        drop table if exists pef_monitoring;
+    """)
+    cursor.execute("""
+        drop table if exists MonitoringSession
+    """)
     connection.commit()
 
 
@@ -38,6 +41,14 @@ def create_tables(connection):
                 state text,
                 time text
             );
+        """)
+    cursor.execute("""
+            create table MonitoringSession (
+            id INTEGER PRIMARY KEY,
+            username TEXT,
+            start_date TEXT,
+            end_date TEXT
+        );
         """)
     connection.commit()
 

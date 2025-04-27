@@ -1,6 +1,8 @@
 from entities.user import User
 from entities.pef import Pef
 from entities.pef_monitoring import PefMonitoring
+from collections import defaultdict
+
 
 from repositories.pef_repository import (
     pef_repository as default_pef_repository
@@ -100,7 +102,7 @@ class PefService:
         """Calculates the percentage difference between before and after PEF values."""
         if before_pef == 0:
             return 0  # Handle division by zero
-        return ((after_pef - before_pef) / before_pef) * 100
+        return abs(((after_pef - before_pef) /before_pef) * 100)
 
     def get_warning_message(
             self, morning_evening_diff, morning_before_after_diff, evening_before_after_diff
@@ -127,20 +129,19 @@ class PefService:
     def calculate_pef_differences(
             self, morning_before, morning_after, evening_before, evening_after
     ):
-        """Calculates the percentage differences 
-        for morning/evening and before/after PEF with optional bronchodilation."""
+        """Calculates the percentage differences
+        for morning/evening and before/after PEF with formulas."""
 
-        # Calculate morning/evening PEF difference (regardless of bronchodilation)
+        # Diurnal variation = difference between morning and evening (before meds), using average
         morning_evening_diff = None
         if morning_before is not None and evening_before is not None:
-            morning_evening_diff = self.calculate_percentage_difference(
-                morning_before, evening_before)
+            avg = (morning_before + evening_before) / 2
+            morning_evening_diff = abs((evening_before - morning_before) / avg * 100)
 
-        # Initialize the before/after differences
+        # Bronchodilation responses
         before_after_diff_morning = None
         before_after_diff_evening = None
 
-        # Only calculate the before/after differences if bronchodilation values are provided
         if morning_before is not None and morning_after is not None:
             before_after_diff_morning = self.calculate_percentage_difference(
                 morning_before, morning_after)
@@ -149,9 +150,9 @@ class PefService:
             before_after_diff_evening = self.calculate_percentage_difference(
                 evening_before, evening_after)
 
-        # Get the warning message based on the differences calculated
+        # Warning message if needed
         warning_message = self.get_warning_message(
-            morning_evening_diff, before_after_diff_morning or 0, before_after_diff_evening or 0
+            morning_evening_diff, before_after_diff_morning, before_after_diff_evening
         )
 
         return {
@@ -160,6 +161,25 @@ class PefService:
             "before_after_diff_evening": before_after_diff_evening,
             "warning_message": warning_message
         }
+
+    def create_monitoring_session(self, username, start_date, end_date):
+        self._pef_monitoring_repository.create_monitoring_session(username, start_date, end_date)
+
+    def get_sessions_by_username(self, username):
+        return self._pef_monitoring_repository.get_sessions_by_username(username)
+
+    def get_pef_entries_for_session(self, username, start_date, end_date):
+        return self._pef_monitoring_repository.get_pef_entries_for_session(username, start_date, end_date)
+
+    def calculate_monitoring_difference_for_session(self, username, start_date, end_date):
+        # Fetch the PEF entries for the session
+        pefs = self.get_pef_entries_for_session(username, start_date, end_date)
+
+        # Calculate the number of distinct days monitored
+        unique_days = set(p["date"] for p in pefs)
+
+        # Now call the method to calculate differences and pass number of days
+        return self.calculate_monitoring_difference(pefs, len(unique_days))
 
     def add_value_to_monitoring(self, date, username,
                             value1, value2, value3, state, time):
@@ -175,35 +195,67 @@ class PefService:
         res = self._pef_monitoring_repository.find_monitoring_by_username(
             self._user.username)
         return self._pef_monitoring_repository.order_by_date(res)
-# not in use yet ->
-    def calculate_monitoring_difference(self):
-        thresholds = {"over_20": 0, "over_15": 0}
-        pefs = self.get_monitoring_by_username()
-        current_day = None
 
-        daily_values = self._reset_daily_values()
+    def calculate_monitoring_difference_for_session(self, username, start_date, end_date):
+        # Fetch the PEF entries for the session
+        pefs = self.get_pef_entries_for_session(username, start_date, end_date)
+
+        # Calculate the number of distinct days monitored
+        unique_days = set(p["date"] for p in pefs)
+
+        # Now call the method to calculate differences and pass number of days
+        return self.calculate_monitoring_difference(pefs, len(unique_days))
+
+    def calculate_monitoring_difference(self, pefs, monitored_days_count):
+        """Calculate differences and thresholds based on PEF values"""
+        thresholds = {"over_20": 0, "over_15": 0}
+        daily_data = defaultdict(lambda: {
+            "max_m": None, "max_m_p": None, "max_e": None, "max_e_p": None
+        })
+
+        all_pef_values = []
 
         for values in pefs:
-            if current_day != values.date:
-                current_day = values.date
-                daily_values = self._reset_daily_values()
+            date = values["date"]
+            self._assign_max_value(values, daily_data[date])
+            all_pef_values.append(self._get_max_value(values))
 
-            self._assign_max_value(values, daily_values)
+        for date, vals in daily_data.items():
+            m = vals["max_m"]
+            e = vals["max_e"]
 
-            if all(daily_values.values()):
-                prosm, prose, pros_d = self._calculate_day_differences(
-                    daily_values["max_m"],
-                    daily_values["max_m_p"],
-                    daily_values["max_e"],
-                    daily_values["max_e_p"]
-                )
-                thresholds = self._update_thresholds(prosm, prose, pros_d, thresholds)
+            # Calculate daily variation (morning vs evening)
+            if m is not None and e is not None:
+                variation = abs(m - e) / max(m, e) * 100
+                if variation >= 20 and abs(m - e) >= 60:
+                    thresholds["over_20"] += 1
+
+            # Bronchodilation response morning
+            if vals["max_m"] is not None and vals["max_m_p"] is not None:
+                prosm = ((vals["max_m_p"] - vals["max_m"]) / vals["max_m"]) * 100
+                if prosm >= 15:
+                    thresholds["over_15"] += 1
+
+            # Bronchodilation response evening
+            if vals["max_e"] is not None and vals["max_e_p"] is not None:
+                prose = ((vals["max_e_p"] - vals["max_e"]) / vals["max_e"]) * 100
+                if prose >= 15:
+                    thresholds["over_15"] += 1
+
+        if all_pef_values:
+            highest = max(all_pef_values)
+            lowest = min(all_pef_values)
+            average = sum(all_pef_values) / len(all_pef_values)
+        else:
+            highest = lowest = average = None
 
         return self._build_monitoring_summary(
-            thresholds["over_20"], thresholds["over_15"]
+            thresholds["over_20"], thresholds["over_15"], monitored_days_count,
+            highest, lowest, average
         )
 
     def _reset_daily_values(self):
+        """Reset the daily values to default (None)"""
         return {
             "max_m": None,
             "max_m_p": None,
@@ -212,47 +264,62 @@ class PefService:
         }
 
     def _assign_max_value(self, values, daily_values):
+        """Assign the maximum value based on the state and time of the measurement"""
         max_val = self._get_max_value(values)
-        if values.state == 'ENNEN LÄÄKETTÄ':
-            if values.time == 'AAMU':
+        if values["state"] == 'ENNEN LÄÄKETTÄ':
+            if values["time"] == 'AAMU':
                 daily_values["max_m"] = max_val
-            elif values.time == 'ILTA':
+            elif values["time"] == 'ILTA':
                 daily_values["max_e"] = max_val
-        elif values.state == 'LÄÄKKEEN JÄLKEEN':
-            if values.time == 'AAMU':
+        elif values["state"] == 'LÄÄKKEEN JÄLKEEN':
+            if values["time"] == 'AAMU':
                 daily_values["max_m_p"] = max_val
-            elif values.time == 'ILTA':
+            elif values["time"] == 'ILTA':
                 daily_values["max_e_p"] = max_val
 
     def _get_max_value(self, values):
-        return max(values.value1, values.value2, values.value3)
+        """Return the maximum value among the three possible PEF values"""
+        return max(values["value1"], values["value2"], values["value3"])
 
     def _calculate_day_differences(self, max_m, max_m_p, max_e, max_e_p):
+        """Calculate the percentage differences between the values"""
         prosm = ((max_m_p - max_m) / max_m) * 100
         prose = ((max_e_p - max_e) / max_e) * 100
-        pros_d = ((max_m - max_e) / max_m) * 100
+        pros_d = ((max(max_m, max_e) - min(max_m, max_e)) / max(max_m, max_e)) * 100
         return prosm, prose, pros_d
 
     def _update_thresholds(self, prosm, prose, pros_d, thresholds):
+        """Update thresholds for different conditions (e.g., over 15%, over 20%)"""
         if prosm >= 15 or prose >= 15:
             thresholds["over_15"] += 1
         if pros_d >= 20:
             thresholds["over_20"] += 1
         return thresholds
 
-    def _build_monitoring_summary(self, over_20, over_15):
-        if over_20 >= 3 and over_15 >= 3:
-            return (
-                f'Vuorokausi vaihtelu on ylittänyt diagnoosi rajan {over_20} kertaa!\n'
-                f'Bronkodilataatiovaste on ylittänyt diagnoosi rajan {over_15} kertaa!'
-            )
-        if over_20 >= 3:
-            return f'Vuorokausi vaihtelu on ylittänyt diagnoosi rajan {over_20} kertaa!'
-        if over_15 >= 3:
-            return f'Bronkodilataatiovaste on ylittänyt diagnoosi rajan {over_15} kertaa!'
-        return "Ei merkittäviä muutoksia pef-seurannassa"
-# <-
+    def _build_monitoring_summary(self, over_20, over_15, monitored_days_count, highest, lowest, average):
+        """Builds a summary dictionary instead of a text block."""
+        needed_times = max(1, monitored_days_count // 2)  # Dynamically determine needed threshold count
 
+        if over_20 >= needed_times and over_15 >= needed_times:
+            warning_message = (
+                f'Päivittäinen vaihtelu ylitti diagnostisen kynnyksen {over_20} kertaa!\n'
+                f'Keuhkoputkia laajentava vaste ylitti diagnostisen kynnyksen {over_15} kertaa!'
+            )
+        elif over_20 >= needed_times:
+            warning_message = f'Päivittäinen vaihtelu ylitti diagnostisen kynnyksen {over_20} kertaa!'
+        elif over_15 >= needed_times:
+            warning_message = f'Keuhkoputkia laajentava vaste ylitti diagnostisen kynnyksen {over_15} kertaa!'
+        else:
+            warning_message = "Ei merkittäviä muutoksia PEF-seurannassa."
+
+        return {
+            "over_20": over_20,
+            "over_15": over_15,
+            "highest": highest,
+            "lowest": lowest,
+            "average": average,
+            "warning_message": warning_message
+        }
     def get_current_user(self):
         # returns the current logged-in user, or None if not logged in
         return self._user

@@ -39,5 +39,30 @@ class PefMonitoringRepository:
         cursor.execute("delete from Pef_monitoring")
         self._connection.commit()
 
+    def create_monitoring_session(self, username, start_date, end_date):
+        cursor = self._connection.cursor()
+        cursor.execute("""
+            INSERT INTO MonitoringSession (username, start_date, end_date)
+            VALUES (?, ?, ?)
+        """, (username, start_date, end_date))
+        self._connection.commit()
+
+    def get_sessions_by_username(self, username):
+        cursor = self._connection.cursor()
+        cursor.execute("""
+            SELECT * FROM MonitoringSession
+            WHERE username = ?
+            ORDER BY start_date DESC
+        """, (username,))
+        return cursor.fetchall()
+
+    def get_pef_entries_for_session(self, username, start_date, end_date):
+        cursor = self._connection.cursor()
+        cursor.execute("""
+            SELECT * FROM Pef_monitoring
+            WHERE username = ? AND date BETWEEN ? AND ?
+        """, (username, start_date, end_date))
+        return cursor.fetchall()
+
 
 pef_monitoring_repository = PefMonitoringRepository(get_database_connection())

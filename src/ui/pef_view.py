@@ -1,6 +1,8 @@
-from tkinter import ttk, StringVar, constants, END, messagebox
+from tkinter import ttk, StringVar, constants, END, messagebox, Text
+import tkinter as tk
 from tkcalendar import Calendar
-from datetime import datetime
+from datetime import datetime, timedelta
+import textwrap
 from services.pef_service import pef_service
 
 
@@ -517,19 +519,24 @@ class PefListView:
     def _toggle_pef_section(self):
         """Toggle visibility of the PEF monitoring section."""
         if self._pef_frame.winfo_ismapped():
-            # If the frame is visible, hide it
+            # Hide the PEF section
             self._pef_frame.grid_forget()
             self._toggle_button.config(text="Pef-seuranta")
         else:
-            # If the frame is hidden, show it and create the monitoring section if not created
+            # Show the PEF section (create if needed)
             if not hasattr(self, '_pef_monitoring_section_created') or not self._pef_monitoring_section_created:
-                self._create_pef_monitoring_section()  # Create inputs for the first time
-                self._pef_monitoring_section_created = True  # Mark as created
+                self._create_pef_monitoring_section()
+                self._pef_monitoring_section_created = True
 
-            self._pef_frame.grid(row=1, column=0, padx=10,
-                                 pady=10, sticky="ew")  # Show the frame
+            self._pef_frame.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
             self._populate_pef_data_table()
             self._toggle_button.config(text="Piilota pef-seuranta")
+
+            # Auto-resize the window to fit contents
+            self._root.update_idletasks()  # Make sure everything is rendered
+            required_height = self._pef_frame.winfo_reqheight() + 300  # Add padding
+            current_width = self._root.winfo_width()
+            self._root.geometry(f"{current_width}x{required_height}")
 
     def _create_pef_monitoring_section(self):
         """Create the PEF monitoring section inputs."""
@@ -543,7 +550,13 @@ class PefListView:
         self._date_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
 
         self._calendar = Calendar(
-            self._pef_frame, selectmode='day', date_pattern='yyyy-mm-dd')
+            self._pef_frame,
+            selectmode='day',
+            date_pattern='yyyy-mm-dd',
+            font=("Helvetica", 9),
+            showweeknumbers=False,
+            firstweekday="monday"
+        )
         self._calendar.grid(row=0, column=1, padx=5, pady=5, sticky="w")
         self._calendar.selection_set(datetime.today().date())
 
@@ -610,28 +623,25 @@ class PefListView:
         self._populate_pef_data_table()
 
     def _save_and_continue(self):
-        """Save the data and clear the fields for the next input."""
-        self._save_pef_data()
-        self._populate_pef_data_table()
-        self._clear_pef_inputs()
+        """Save the data and clear the fields for the next input — only if successful."""
+        if self._save_pef_data():
+            self._populate_pef_data_table()
+            self._clear_pef_inputs(keep_date=True)
 
     def _save_pef_data(self):
         """Collect and store the PEF monitoring data."""
-        date = self._calendar.get_date()  # Get the selected date
+        date = self._calendar.get_date()
         username = self._logged_in_user.username
-        value1 = self._pef_value_1_entry.get()  # First PEF value
-        value2 = self._pef_value_2_entry.get()  # Second PEF value
-        value3 = self._pef_value_3_entry.get()  # Third PEF value
-        state = self._medication_dropdown.get()  # Before or after medication
+        value1 = self._pef_value_1_entry.get()
+        value2 = self._pef_value_2_entry.get()
+        value3 = self._pef_value_3_entry.get()
+        state = self._medication_dropdown.get()
         time = self._time_of_day_dropdown.get()
-        print(
-            f"Date: {date}, Value1: {value1}, Value2: {value2}, Value3: {value3}, State: {state}, Time: {time}")
 
         if not all([value1, value2, value3, state, time]):
             messagebox.showerror("Virhe", "Kaikki kentät on täytettävä.")
-            return
+            return False
 
-        # Check if all values are digits and within the valid range
         try:
             val1 = int(value1)
             val2 = int(value2)
@@ -640,27 +650,22 @@ class PefListView:
                 raise ValueError
         except ValueError:
             messagebox.showerror("Virhe", "PEF-arvojen tulee olla numeroita välillä 10–999.")
-            return
+            return False
 
-        self._pef_service.add_value_to_monitoring(date,
-                                                  username,
-                                                  value1,
-                                                  value2,
-                                                  value3,
-                                                  state,
-                                                  time
-                                                  )
-        print(f"PEF Data Saved")
+        self._pef_service.add_value_to_monitoring(date, username, value1, value2, value3, state, time)
+        print("PEF Data Saved")
+        return True
 
-    def _clear_pef_inputs(self):
-        """Clear all input fields for new data entry."""
-        self._calendar.selection_set(
-            datetime.today().date())  # Reset calendar to today
-        self._time_of_day_dropdown.set('')  # Reset the time of day dropdown
-        self._medication_dropdown.set('')  # Reset the medication dropdown
-        self._pef_value_1_entry.delete(0, END)  # Clear PEF value 1 field
-        self._pef_value_2_entry.delete(0, END)  # Clear PEF value 2 field
-        self._pef_value_3_entry.delete(0, END)  # Clear PEF value 3 field
+    def _clear_pef_inputs(self, keep_date=False):
+        """Clear all input fields for new data entry. Optionally preserve the selected date."""
+        if not keep_date:
+            self._calendar.selection_set(datetime.today().date())
+
+        self._time_of_day_dropdown.set('')
+        self._medication_dropdown.set('')
+        self._pef_value_1_entry.delete(0, END)
+        self._pef_value_2_entry.delete(0, END)
+        self._pef_value_3_entry.delete(0, END)
 
     def _create_pef_data_table(self):
         """Creates and populates the table to display saved PEF monitoring entries."""
@@ -671,10 +676,16 @@ class PefListView:
         # Define columns
         columns = ("date", "value1", "value2", "value3", "state", "time")
 
-        self._pef_table = ttk.Treeview(
-            self._pef_frame, columns=columns, show="headings", height=5)
-        self._pef_table.grid(row=9, column=0, columnspan=2,
-                             sticky="nsew", pady=5)
+        # Create Treeview with columns
+        self._pef_table = ttk.Treeview(self._pef_frame, columns=columns, show="headings", height=5)
+
+        # Add a scrollbar to the table
+        self._scrollbar = ttk.Scrollbar(self._pef_frame, orient="vertical", command=self._pef_table.yview)
+        self._pef_table.configure(yscrollcommand=self._scrollbar.set)
+
+        # Set table and scrollbar grid layout
+        self._pef_table.grid(row=9, column=0, columnspan=2, sticky="nsew", pady=5)
+        self._scrollbar.grid(row=9, column=2, sticky="ns")
 
         # Define headings
         self._pef_table.heading("date", text="Päivämäärä")
@@ -684,26 +695,224 @@ class PefListView:
         self._pef_table.heading("state", text="Lääke")
         self._pef_table.heading("time", text="Aika päivästä")
 
-        # Optional: Set column widths
-        for col in columns:
-            self._pef_table.column(col, anchor="center", width=100)
+        self._pef_table.column("date", anchor="center", width=90)
+        self._pef_table.column("value1", anchor="center", width=80)
+        self._pef_table.column("value2", anchor="center", width=80)
+        self._pef_table.column("value3", anchor="center", width=80)
+        self._pef_table.column("state", anchor="center", width=130)
+        self._pef_table.column("time", anchor="center", width=110)
+
+        # Add "Lopeta" button after the summary
+        self._lopeta_button = ttk.Button(self._pef_frame, text="Lopeta", command=self.lopeta_button_click)
+        self._lopeta_button.grid(row=11, column=0, columnspan=2, pady=10)
 
         self._populate_pef_data_table()  # Load initial data
 
     def _populate_pef_data_table(self):
         """Fetches and inserts user monitoring data into the table."""
+        # First, clear the table
         for row in self._pef_table.get_children():
             self._pef_table.delete(row)
 
+        # Fetch all completed monitoring sessions (with start and end dates)
+        completed_sessions = self._pef_service.get_sessions_by_username(self._logged_in_user.username)
+
+        completed_dates = set()
+
+        # Build a set of all dates that are part of completed monitoring periods
+        for session in completed_sessions:
+            try:
+                session_start_date = datetime.strptime(session["start_date"], "%Y-%m-%d").date()
+                session_end_date = datetime.strptime(session["end_date"], "%Y-%m-%d").date()
+            except Exception as e:
+                print(f"Error parsing session dates: {e}")
+                continue  # Skip if invalid date format
+
+            current_date = session_start_date
+            while current_date <= session_end_date:
+                completed_dates.add(current_date)
+                current_date += timedelta(days=1)
+
+        # Now fetch all monitoring entries (all saved PEF measurements)
         data = self._pef_service.get_monitoring_by_username()
-        print("DEBUG: Retrieved data:", data)
+
+        print("DEBUG: Retrieved monitoring data:", data)
+
         if not data:
             return
 
+        # Filter out entries that are already part of completed sessions
+        filtered_data = []
         for entry in data:
+            try:
+                entry_date = datetime.strptime(entry[2], "%Y-%m-%d").date()
+            except Exception as e:
+                print(f"Error parsing monitoring entry date: {e}")
+                continue  # Skip invalid date entries
+
+            if entry_date not in completed_dates:
+                filtered_data.append(entry)
+
+        # Now populate the table with filtered (unfinished) monitoring entries
+        for entry in filtered_data:
             self._pef_table.insert("", "end", values=(
-                entry[2], entry[3], entry[4], entry[5], entry[6], entry[7]
+                entry[2],  # date (as string, original)
+                entry[3],  # value1
+                entry[4],  # value2
+                entry[5],  # value3
+                entry[6],  # state (before/after medication)
+                entry[7]   # time of day (morning/evening)
             ))
+
+    def lopeta_button_click(self):
+        """Handles finalizing the monitoring period and showing the results."""
+
+        table_data = self._pef_table.get_children()
+
+        if not table_data:
+            messagebox.showerror("Virhe", "Ei tallennettuja tietoja. Et voi päättää seurantaa ilman tietoja.")
+            return
+
+        # Get start and end dates
+        start_date = self._pef_table.item(table_data[0])['values'][0]
+        end_date = self._pef_table.item(table_data[-1])['values'][0]
+
+        username = self._logged_in_user.username
+
+        # Save monitoring session
+        self._pef_service.create_monitoring_session(username, start_date, end_date)
+
+        # Calculate summary
+        monitoring_summary = self._pef_service.calculate_monitoring_difference_for_session(
+            username, start_date, end_date
+        )
+        self._show_monitoring_results(monitoring_summary)
+
+    def _open_past_monitorings_view(self):
+        """Open a new popup window to select and view past monitoring summaries."""
+
+        # Create a new popup window
+        self._past_sessions_window = tk.Toplevel(self._root)
+        self._past_sessions_window.title("Aiemmat seurannat")
+        self._past_sessions_window.geometry("400x300")  # Set a reasonable size
+
+        # Fetch previous sessions
+        sessions = self._pef_service.get_sessions_by_username(self._logged_in_user.username)
+
+        if not sessions:
+            # Show a simple message if no previous monitorings
+            no_sessions_label = ttk.Label(self._past_sessions_window, text="Sinulla ei ole aiempia seurantoja.")
+            no_sessions_label.pack(padx=10, pady=20)
+
+            # Show a simple close button
+            close_button = ttk.Button(self._past_sessions_window, text="Sulje",
+                                      command=self._past_sessions_window.destroy)
+            close_button.pack(pady=10)
+            return
+
+        # Create listbox to show sessions
+        self._session_listbox = ttk.Treeview(self._past_sessions_window, columns=("start_date", "end_date"),
+                                             show="headings")
+        self._session_listbox.heading("start_date", text="Alkupäivä")
+        self._session_listbox.heading("end_date", text="Loppupäivä")
+        self._session_listbox.pack(padx=10, pady=10, fill="both", expand=True)
+
+        for session in sessions:
+            self._session_listbox.insert("", "end", values=(session["start_date"], session["end_date"]))
+
+        # Button to view selected session
+        view_button = ttk.Button(self._past_sessions_window, text="Näytä seurantaraportti",
+                                 command=self._view_selected_session)
+        view_button.pack(pady=5)
+
+        # Close button
+        close_button = ttk.Button(self._past_sessions_window, text="Sulje", command=self._past_sessions_window.destroy)
+        close_button.pack(pady=5)
+
+    def _view_selected_session(self):
+        """View the summary of the selected monitoring session."""
+        selected_item = self._session_listbox.selection()
+
+        if not selected_item:
+            messagebox.showerror("Virhe", "Valitse seuranta ensin.")
+            return
+
+        selected_values = self._session_listbox.item(selected_item)['values']
+        start_date, end_date = selected_values
+
+        username = self._logged_in_user.username
+
+        # Fetch and calculate the report
+        monitoring_summary = self._pef_service.calculate_monitoring_difference_for_session(
+            username, start_date, end_date
+        )
+
+        if not isinstance(monitoring_summary, dict):
+            messagebox.showerror("Virhe", f"Seurantaraportin lataus epäonnistui: {monitoring_summary}")
+            return
+
+        # Format the report text
+        report_text = textwrap.dedent(f"""
+            📊 PEF-seurantaraportti:
+    
+            • Päivittäinen vaihtelu ≥ 20 % ja 60 L/min: {monitoring_summary['over_20']} kertaa
+            • Bronkodilataatiovaste ≥ 15 % ja 60 L/min: {monitoring_summary['over_15']} kertaa
+    
+            • Seurantajakson korkein PEF-arvo: {monitoring_summary['highest']} L/min
+            • Alhaisin PEF-arvo: {monitoring_summary['lowest']} L/min
+            • Keskimääräinen PEF-arvo: {monitoring_summary['average']:.1f} L/min
+    
+            🔔 Yhteenveto:
+            {monitoring_summary['warning_message']}
+        """)
+
+        # Show the formatted report
+        messagebox.showinfo(
+            "Seurantaraportti",
+            f"Seurantajakso: {start_date} - {end_date}\n\n{report_text.strip()}"
+        )
+    def _show_monitoring_results(self, summary_data):
+        popup = tk.Toplevel(self._root)
+        popup.title("Seurannan tulokset")
+
+        # Bind the close event to a function that handles cleanup
+        popup.protocol("WM_DELETE_WINDOW", lambda: self._on_results_popup_close(popup))
+
+        result_text = textwrap.dedent(f"""
+            📊 PEF-seurannan tulokset:
+
+            • Päivittäinen vaihtelu ≥ 20 % ja 60 L/min: {summary_data['over_20']} kertaa
+            • Bronkodilataatiovaste ≥ 15 % ja 60 L/min: {summary_data['over_15']} kertaa
+
+            • Seurantajakson korkein PEF-arvo: {summary_data['highest']} L/min
+            • Alhaisin PEF-arvo: {summary_data['lowest']} L/min
+            • Keskimääräinen PEF-arvo: {summary_data['average']:.1f} L/min
+
+            🔔 Yhteenveto:
+            {summary_data['warning_message']}
+        """)
+
+        tk.Label(popup, text=result_text.strip(), justify="left").pack(padx=20, pady=20)
+
+        close_btn = ttk.Button(popup, text="Sulje", command=lambda: self._on_results_popup_close(popup))
+        close_btn.pack(pady=(0, 20))
+
+    def _on_results_popup_close(self, popup):
+        popup.destroy()
+        self._clear_current_session_data()
+
+    def _clear_current_session_data(self):
+        """Clears all session-specific data and resets the form."""
+        self._clear_pef_inputs()
+
+        # Clear table rows
+        for row in self._pef_table.get_children():
+            self._pef_table.delete(row)
+
+        # Reset buttons
+        self._save_button.config(state="normal")
+        self._save_continue_button.config(state="normal")
+        self._lopeta_button.config(state="normal")
 
     def _initialize(self):
         # Main frame
@@ -745,6 +954,12 @@ class PefListView:
         self._initialize_pef_reference_button()  # Näytä/Peitä PEF-viite
         self._initialize_comparison_button()  # Näytä/Peitä vertailu
         self._create_pef_toggle_button()  # Näytä/Peitä seuranta
+        self._view_past_sessions_button = ttk.Button(
+            self._left_panel,
+            text="Katso aiemmat seurannat",
+            command=self._open_past_monitorings_view
+        )
+        self._view_past_sessions_button.grid(row=4, column=0, padx=10, pady=10, sticky="w")
 
         # Placeholder frames for toggleable sections
         self._reference_section = ttk.Frame(self._center_panel)
