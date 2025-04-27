@@ -1,7 +1,7 @@
+from collections import defaultdict
 from entities.user import User
 from entities.pef import Pef
 from entities.pef_monitoring import PefMonitoring
-from collections import defaultdict
 
 
 from repositories.pef_repository import (
@@ -169,17 +169,9 @@ class PefService:
         return self._pef_monitoring_repository.get_sessions_by_username(username)
 
     def get_pef_entries_for_session(self, username, start_date, end_date):
-        return self._pef_monitoring_repository.get_pef_entries_for_session(username, start_date, end_date)
-
-    def calculate_monitoring_difference_for_session(self, username, start_date, end_date):
-        # Fetch the PEF entries for the session
-        pefs = self.get_pef_entries_for_session(username, start_date, end_date)
-
-        # Calculate the number of distinct days monitored
-        unique_days = set(p["date"] for p in pefs)
-
-        # Now call the method to calculate differences and pass number of days
-        return self.calculate_monitoring_difference(pefs, len(unique_days))
+        return self._pef_monitoring_repository.get_pef_entries_for_session(
+            username, start_date, end_date
+        )
 
     def add_value_to_monitoring(self, date, username,
                             value1, value2, value3, state, time):
@@ -215,44 +207,64 @@ class PefService:
 
         all_pef_values = []
 
+        # Populate daily data and collect all PEF values
         for values in pefs:
             date = values["date"]
             self._assign_max_value(values, daily_data[date])
             all_pef_values.append(self._get_max_value(values))
 
+        # Process daily data to calculate variations and responses
         for date, vals in daily_data.items():
-            m = vals["max_m"]
-            e = vals["max_e"]
+            self._process_day_thresholds(vals, thresholds)
 
-            # Calculate daily variation (morning vs evening)
-            if m is not None and e is not None:
-                variation = abs(m - e) / max(m, e) * 100
-                if variation >= 20 and abs(m - e) >= 60:
-                    thresholds["over_20"] += 1
+        # Calculate highest, lowest, and average PEF values
+        highest, lowest, average = self._calculate_pef_stats(all_pef_values)
 
-            # Bronchodilation response morning
-            if vals["max_m"] is not None and vals["max_m_p"] is not None:
-                prosm = ((vals["max_m_p"] - vals["max_m"]) / vals["max_m"]) * 100
-                if prosm >= 15:
-                    thresholds["over_15"] += 1
+        return self._build_monitoring_summary(
+            thresholds["over_20"], thresholds["over_15"], monitored_days_count,
+            highest, lowest, average
+        )
 
-            # Bronchodilation response evening
-            if vals["max_e"] is not None and vals["max_e_p"] is not None:
-                prose = ((vals["max_e_p"] - vals["max_e"]) / vals["max_e"]) * 100
-                if prose >= 15:
-                    thresholds["over_15"] += 1
+    def _process_day_thresholds(self, vals, thresholds):
+        """Process a single day's PEF data and update the thresholds"""
+        m = vals["max_m"]
+        e = vals["max_e"]
 
+        # Calculate daily variation (morning vs evening)
+        if m is not None and e is not None:
+            variation = self._calculate_daily_variation(m, e)
+            if variation >= 20 and abs(m - e) >= 60:
+                thresholds["over_20"] += 1
+
+        # Bronchodilation response morning
+        if vals["max_m"] is not None and vals["max_m_p"] is not None:
+            prosm = self._calculate_bronchodilation_response(vals["max_m"], vals["max_m_p"])
+            if prosm >= 15:
+                thresholds["over_15"] += 1
+
+        # Bronchodilation response evening
+        if vals["max_e"] is not None and vals["max_e_p"] is not None:
+            prose = self._calculate_bronchodilation_response(vals["max_e"], vals["max_e_p"])
+            if prose >= 15:
+                thresholds["over_15"] += 1
+
+    def _calculate_daily_variation(self, m, e):
+        """Calculate the daily variation between morning and evening PEF values"""
+        return abs(m - e) / max(m, e) * 100
+
+    def _calculate_bronchodilation_response(self, initial, post):
+        """Calculate the bronchodilation response percentage"""
+        return ((post - initial) / initial) * 100
+
+    def _calculate_pef_stats(self, all_pef_values):
+        """Calculate highest, lowest, and average PEF values"""
         if all_pef_values:
             highest = max(all_pef_values)
             lowest = min(all_pef_values)
             average = sum(all_pef_values) / len(all_pef_values)
         else:
             highest = lowest = average = None
-
-        return self._build_monitoring_summary(
-            thresholds["over_20"], thresholds["over_15"], monitored_days_count,
-            highest, lowest, average
-        )
+        return highest, lowest, average
 
     def _reset_daily_values(self):
         """Reset the daily values to default (None)"""
@@ -296,9 +308,11 @@ class PefService:
             thresholds["over_20"] += 1
         return thresholds
 
-    def _build_monitoring_summary(self, over_20, over_15, monitored_days_count, highest, lowest, average):
+    def _build_monitoring_summary(self, over_20, over_15,
+                                  monitored_days_count, highest, lowest, average
+                                  ):
         """Builds a summary dictionary instead of a text block."""
-        needed_times = max(1, monitored_days_count // 2)  # Dynamically determine needed threshold count
+        needed_times = max(1, monitored_days_count // 2)
 
         if over_20 >= needed_times and over_15 >= needed_times:
             warning_message = (
@@ -306,9 +320,11 @@ class PefService:
                 f'Keuhkoputkia laajentava vaste ylitti diagnostisen kynnyksen {over_15} kertaa!'
             )
         elif over_20 >= needed_times:
-            warning_message = f'Päivittäinen vaihtelu ylitti diagnostisen kynnyksen {over_20} kertaa!'
+            warning_message = (f'Päivittäinen vaihtelu ylitti diagnostisen kynnyksen'
+                               f' {over_20} kertaa!')
         elif over_15 >= needed_times:
-            warning_message = f'Keuhkoputkia laajentava vaste ylitti diagnostisen kynnyksen {over_15} kertaa!'
+            warning_message = (f'Keuhkoputkia laajentava vaste ylitti diagnostisen kynnyksen'
+                               f' {over_15} kertaa!')
         else:
             warning_message = "Ei merkittäviä muutoksia PEF-seurannassa."
 
