@@ -914,6 +914,50 @@ class PefListView:
         self._save_continue_button.config(state="normal")
         self._lopeta_button.config(state="normal")
 
+    def _show_instructions_popup(self):
+        """Shows a popup window with the detailed instructions for the app."""
+        instructions_text = textwrap.dedent("""
+            📖 **PEF-sovelluksen - Ohjeet**
+
+            1️⃣ **PEF-viitearvo**:
+                - **PEF-viitearvojen laskeminen**:  
+                    Voit laskea PEF-viitearvot painamalla **"Näytä/Peitä PEF-viite"** -painiketta.
+                    - Laskuri käyttää antamiasi tietoja, kuten **pituus**, **ikä** ja **sukupuoli**, laskeakseen viitearvot, joiden avulla voit verrata omia PEF-arvojasi odotettuihin arvoihin.
+                - Laskennan jälkeen viitearvot näytetään sovelluksen **vasemmalla puolella** vertailua varten.
+
+            2️⃣ **PEF-vertailun teko**:
+                - **Pikavertailu - PEF-vertailu**:  
+                    PEF-vertailu on suunniteltu nopeisiin tarkistuksiin eri mittaussarjojen välillä.
+                    - Jokaiselta päivältä syötetään parhaat ja huonoimmat PEF-arvot useista mittauksista (esim. ennen ja jälkeen lääkityksen). Näin saadaan käsitys vuorokausivaihtelusta.
+                    - Voit myös tarkastella **bronkodilataatiovastetta**, jos se on käytettävissä. Tässä tapauksessa käytetään vain lääkityksettömiä PEF-arvoja vuorokausivaihtelun laskemiseen (ilman bronkodilataatiovastetta).
+                    - **"Näytä/Peitä vertailu"** -painike kytkee vertailuosion näkyville.
+
+            3️⃣ **PEF-seuranta**:
+                - **PEF-tietojen syöttäminen**:  
+                    Yksi PEF-mittaus sisältää kolme peräkkäistä puhallusta. Kunkin puhallussarjan korkein PEF-arvo tallennetaan sovellukseen.
+                    - Mittaustuloksia seurataan eri vuorokaudenaikoina (Aamu/Ilta), ja merkitään, onko se ennen vai jälkeen lääkityksen.
+                    - Paina **"Tallenna ja jatka"** tallentaaksesi tiedot ja syöttääksesi uuden mittaussarjan. Jos olet valmis, paina **"Tallenna ja sulje"** lopettaaksesi istunnon.
+                - Kun olet syöttänyt PEF-arvot tietylle ajanjaksolle, paina **"Lopeta"** lopettaaksesi seurantajakson.
+                - **"Lopeta"**-painikkeen jälkeen sovellus näyttää seurantajakson yhteenvedon, joka sisältää tärkeimmät tilastot, kuten korkein PEF, keskimääräinen PEF ja vuorokausivaihtelu.
+                - Voit tarkastella tuloksia ja nähdä, kuinka PEF-arvosi ovat muuttuneet ajan myötä.
+
+            4️⃣ **Aiemmat seurantajaksojen tulokset**:
+                - Käytä **"Katso aiemmat seurannat"** -painiketta tarkastellaksesi aiempia seurantatietoja.
+                - Valitse haluamasi jakso nähdäksesi yhteenvedon, joka sisältää yksityiskohtaisen analyysin PEF-arvojen vaihteluista ja lääkityksen vaikutuksesta.
+        """)
+
+        # Create the popup window
+        popup = tk.Toplevel(self._root)
+        popup.title("PEF-sovelluksen ohjeet")
+
+        # Display the instructions text inside the popup
+        instructions_label = tk.Label(popup, text=instructions_text, justify="left", padx=10, pady=10)
+        instructions_label.pack(padx=10, pady=10)
+
+        # Button to close the instructions window
+        close_button = ttk.Button(popup, text="Sulje", command=popup.destroy)
+        close_button.pack(pady=10)
+
     def _initialize(self):
         # Main frame
         self._frame = ttk.Frame(master=self._root)
@@ -960,6 +1004,12 @@ class PefListView:
             command=self._open_past_monitorings_view
         )
         self._view_past_sessions_button.grid(row=4, column=0, padx=10, pady=10, sticky="w")
+        self._show_instructions_button = ttk.Button(
+            self._left_panel,
+            text="Näytä ohjeet",  # Button text: "Show Instructions"
+            command=self._show_instructions_popup  # Function to show instructions
+        )
+        self._show_instructions_button.grid(row=5, column=0, padx=10, pady=10, sticky="w")
 
         # Placeholder frames for toggleable sections
         self._reference_section = ttk.Frame(self._center_panel)
