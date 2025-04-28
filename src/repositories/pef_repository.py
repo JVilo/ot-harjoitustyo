@@ -5,18 +5,18 @@ from config import PEF_FILE_PATH
 
 
 class PefRepository:
-    """Repository class for managing PEF references."""
+    """Repository for managing PEF references stored in a file."""
 
     def __init__(self, file_path):
-        """Constructor for the PefRepository class.
+        """Initializes the repository with the file path.
 
         Args:
-            file_path: Path to the file where the PEF references are saved.
+            file_path: Path to the file storing PEF references.
         """
         self._file_path = file_path
 
     def find_all(self):
-        """Returns all PEF references.
+        """Retrieves all PEF references from the file.
 
         Returns:
             List of Pef objects.
@@ -24,13 +24,13 @@ class PefRepository:
         return self._read()
 
     def find_by_user(self, user):
-        """Returns the PEF reference for a specific user.
+        """Finds all PEF references associated with a specific user.
 
         Args:
-            user: The user whose PEF reference is being fetched.
+            user: The User object to filter references.
 
         Returns:
-            List of Pef objects belonging to the user.
+            List of Pef objects for the user.
         """
         pefs = self.find_all()
         user_pefs = filter(
@@ -38,53 +38,50 @@ class PefRepository:
         return list(user_pefs)
 
     def create(self, reference_pef):
-        """Saves the reference PEF value for a user in the repository.
+        """Saves a new reference PEF for a user.
 
         Args:
-            user_id: The ID of the user to save the reference PEF for.
-            reference_pef: The reference PEF value to store.
+            reference_pef: The Pef object to save.
 
         Returns:
-            The saved PEF record.
+            The list of Pef objects after addition.
         """
-        # Create a new PEF entry
-        new_referenc = self.find_all()
-        # Append the new PEF record to the list of existing records
-        new_referenc.append(reference_pef)
-
-        # Write the updated data back to the file
-        self._write(new_referenc)
-
-        return new_referenc
+        pefs = self.find_all()
+        pefs.append(reference_pef)
+        self._write(pefs)
+        return pefs
 
     def get_latest_for_user(self, username):
-        ref = self.find_all()
+        """Retrieves the latest PEF references for a username.
 
-        # Adjust based on your actual repository code
-        return [pef for pef in ref if pef.user and pef.user.username == username]
+        Args:
+            username: The username to filter references.
+
+        Returns:
+            List of Pef objects for the user.
+        """
+        all_pefs = self.find_all()
+        return [pef for pef in all_pefs if pef.user and pef.user.username == username]
 
     def _ensure_file_exists(self):
-        """Ensures the file exists."""
-        # Make sure the directory exists
+        """Ensures the reference file exists, creating directories and file if necessary."""
         directory = Path(self._file_path).parent
-        # Create the directory if it doesn't exist
         directory.mkdir(parents=True, exist_ok=True)
-
-        # Create the file if it doesn't exist
-        Path(self._file_path).touch()
+        Path(self._file_path).touch(exist_ok=True)
 
     def _read(self):
-        """Reads the PEF references from the file.
+        """Reads PEF references from the file.
 
         Returns:
             List of Pef objects.
         """
         pefs = []
         self._ensure_file_exists()
-
         with open(self._file_path, encoding="utf-8") as file:
             for row in file:
                 row = row.strip()
+                if not row:
+                    continue
                 parts = row.split(";")
                 pef_id = parts[0]
                 value = float(parts[1])
@@ -92,20 +89,19 @@ class PefRepository:
                 user = user_repository.find_by_username(
                     username) if username else None
                 pefs.append(Pef(value=value, user=user, pef_id=pef_id))
-
         return pefs
 
     def _write(self, pefs):
-        """Writes the PEF references to the file.
+        """Writes the list of Pef objects to the file.
 
         Args:
-            pefs: The list of Pef objects to be saved.
+            pefs: List of Pef objects to write.
         """
         self._ensure_file_exists()
-
         with open(self._file_path, "w", encoding="utf-8") as file:
             for pef in pefs:
-                row = f"{pef.pef_id};{pef.value};{pef.user.username if pef.user else ''}"
+                username_str = pef.user.username if pef.user else ''
+                row = f"{pef.pef_id};{pef.value};{username_str}"
                 file.write(row + "\n")
 
 
