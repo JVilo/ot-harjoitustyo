@@ -39,7 +39,7 @@ classDiagram
     }
 ```
 
-Sovelluksen keskeinen toiminnallisuus on toteutettu PefService-luokan ainoalla oliolla. Tämä luokka tarjoaa metodit kaikille käyttöliittymän toiminnoille, kuten:
+Toiminnallisten elementtien hallinnasta vastaa PefService-luokan ainoa olio. Tämä luokka tarjoaa erilliset metodit kaikille käyttöliittymän toiminnoille, kuten:
 
 - `login(username, password)`
 - `create_user(username, password, password2)`
@@ -47,8 +47,13 @@ Sovelluksen keskeinen toiminnallisuus on toteutettu PefService-luokan ainoalla o
 - `get_user_pef()`
 - `count_reference_pef(height, age, gender, user)`
 - `calculate_pef_differences(morning_before, morning_after, evening_before, evening_after)`
+- `create_monitoring_session(username, start_date, end_date)`
+- `get_sessions_by_username(username)`
+- `def add_value_to_monitoring( date, username,value1, value2, value3, state, time)`
+- `_build_monitoring_summary( over_20, over_15,monitored_days_count, highest, lowest, average)`
+- `calculate_monitoring_difference_for_session(self, username, start_date, end_date)`
 
-_PefService_-luokka kommunikoi käyttäjätiedon ja PEF-tiedon kanssa repository-luokkien, kuten [PefRepository](https://github.com/JVilo/ot-harjoitustyo/blob/main/src/repositories/pef_repository.py) ja [UserRepository](https://github.com/JVilo/ot-harjoitustyo/blob/main/src/repositories/user_repository.py), kautta, jotka hoitavat tietojen pysyväistallennuksen. Nämä repositoryt injektoidaan sovelluslogiikkaan konstruktorin kautta.
+_PefService_ pääsee käsiksi käyttäjätietoihin ja pef-tietoihin pakkauksen repositories osassa olevien luokkien, kuten [PefRepository](https://github.com/JVilo/ot-harjoitustyo/blob/main/src/repositories/pef_repository.py) , [UserRepository](https://github.com/JVilo/ot-harjoitustyo/blob/main/src/repositories/user_repository.py) ja [PefMonitoringRepository](https://github.com/JVilo/ot-harjoitustyo/blob/main/src/repositories/pef_monitorin_repository.py), avulla. Nämä luokat injektoidaan sovelluslogiikkaan konstruktorin kautta.
 
 `PefService`-luokan ja ohjelman muiden osien välinen suhde kuvataan seuraavassa luokka/pakkauskaaviossa:
 
