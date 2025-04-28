@@ -21,3 +21,10 @@
 - Käyttäjä voi lisätä pef-seurannan mittauksia sovellukseen.
 - Testejä lisätty uuteen pef_monitorin_repository.py tiedostolle ja pef_servises.py tiedostolle.
 - Ulkonäkö parannuksia tehty käyttöliittymään, sovellus aukeaa isommassa ikkunassa, ja kirjautuneen näkymän nappien paikkoja ja näkymien avautumista muokattu.
+
+## Viikko 6
+
+- käyttäjä voi täyttää haluamansia pituisen pef-seurannan ja kun seuranta on täytetty haluamalla pituudella voi tulokset saada painamalla lopeta.
+- Käyttäjä voi aloittaa uuden pef-seuranna halutessaan. Vanhoja tuloksia voi tarkastella omasta osuudesta "Katso aiemmat seurannat".
+- Useampaan inoutkenttään on lisätty validointeja estämään vääränlaisia söytteitä.
+- Käyttäjä voi tarkkistaa ohjeista miten sovellusta tulis käyttää.
