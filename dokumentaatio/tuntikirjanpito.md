@@ -43,8 +43,9 @@
 | 25.4. |   4   | Pef-seurannan funktioiden muokkaaminen niin että UI voi käyttää yhteenvetoa.                                |
 | 26.4. |   4   | Pef-seurannan tuloksen tuominen UI;hin ja tuloksen näyttäminen popup ikkunassa.                             |
 |       |   2   | Lisätty nappi josta käyttäjä voi katsoa vanhojen pef seurantojen tuloksia osasta "Katso aiemmat seurannat". |
-|       |  1,5  | Testejen tekemine uusiin osioihin ja testi kattavuuden kasvattaminen.                                       |
+|       |  1.5  | Testejen tekemine uusiin osioihin ja testi kattavuuden kasvattaminen.                                       |
 | 27.4. |   2   | Debuggaaminen ja ui testaaminen                                                                             |                                                                                   |
 |       |  0.5  | Koodin refaktorointia.  |
 | 28.4. |   1   | Arkitehtuuri dokumentin päivittäminen. |
-
+|       |   3   | Lisää refaktorointia ja testien korjaamista. |
+|  yht  | 39.38 |  |
