@@ -165,13 +165,18 @@ class TestPefService(unittest.TestCase):
         # Expected values based on the same logic in the service
         expected_morning_evening = abs(
             (evening_before - morning_before) / ((morning_before + evening_before) / 2) * 100)
-        expected_before_after_morning = self.pef_service.calculate_percentage_difference(morning_before, morning_after)
-        expected_before_after_evening = self.pef_service.calculate_percentage_difference(evening_before, evening_after)
+        expected_before_after_morning = self.pef_service.calculate_percentage_difference(
+            morning_before, morning_after)
+        expected_before_after_evening = self.pef_service.calculate_percentage_difference(
+            evening_before, evening_after)
 
         # Assert the differences with an acceptable tolerance for floating-point errors
-        self.assertAlmostEqual(result["morning_evening_diff"], expected_morning_evening, places=3)
-        self.assertAlmostEqual(result["before_after_diff_morning"], expected_before_after_morning, places=3)
-        self.assertAlmostEqual(result["before_after_diff_evening"], expected_before_after_evening, places=3)
+        self.assertAlmostEqual(
+            result["morning_evening_diff"], expected_morning_evening, places=3)
+        self.assertAlmostEqual(
+            result["before_after_diff_morning"], expected_before_after_morning, places=3)
+        self.assertAlmostEqual(
+            result["before_after_diff_evening"], expected_before_after_evening, places=3)
 
         # Assert the warning message (based on the logic from the service)
         self.assertEqual(result["warning_message"], "")
@@ -193,7 +198,8 @@ class TestPefService(unittest.TestCase):
         self.mock_pef_monitoring_repository.get_pef_entries_for_session.return_value = pefs
 
         # Call the method to calculate the differences
-        result = self.pef_service.calculate_monitoring_difference_for_session("MockUser", "2025-04-01", "2025-04-02")
+        result = self.pef_service.calculate_monitoring_difference_for_session(
+            "MockUser", "2025-04-01", "2025-04-02")
 
         # Validate that the returned result contains the correct summary data
         self.assertIn("over_20", result)
@@ -206,13 +212,16 @@ class TestPefService(unittest.TestCase):
     def test_get_warning_message_with_invalid_thresholds(self):
         # Test for values exceeding the thresholds
         msg = self.pef_service.get_warning_message(25, 16, 5)
-        self.assertIn("aamun ja illan välillä", msg)  # Threshold exceeded for morning-evening
+        # Threshold exceeded for morning-evening
+        self.assertIn("aamun ja illan välillä", msg)
 
         msg = self.pef_service.get_warning_message(5, 18, 5)
-        self.assertIn("aamun ennen ja jälkeen", msg)  # Threshold exceeded for morning-before-after
+        # Threshold exceeded for morning-before-after
+        self.assertIn("aamun ennen ja jälkeen", msg)
 
         msg = self.pef_service.get_warning_message(5, 5, 20)
-        self.assertIn("illan ennen ja jälkeen", msg)  # Threshold exceeded for evening-before-after
+        # Threshold exceeded for evening-before-after
+        self.assertIn("illan ennen ja jälkeen", msg)
 
         msg = self.pef_service.get_warning_message(5, 5, 5)
         self.assertEqual(msg, "")  # No warning if no thresholds are exceeded
@@ -233,7 +242,8 @@ class TestPefService(unittest.TestCase):
         )
 
         # Add the value
-        self.pef_service.add_value_to_monitoring(date, username, value1, value2, value3, state, time)
+        self.pef_service.add_value_to_monitoring(
+            date, username, value1, value2, value3, state, time)
 
         # Get the actual call arguments passed to add_value
         args = self.mock_pef_monitoring_repository.add_value.call_args[0][0]
