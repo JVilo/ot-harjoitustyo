@@ -83,7 +83,7 @@ class TestPefService(unittest.TestCase):
         self.pef_service._user = user
         self.mock_pef_repository.create = MagicMock()
 
-        ref_pef = self.pef_service.count_reference_pef(180, 30, 'male')
+        ref_pef = self.pef_service.count_reference_pef(180, 30, 'male').value
 
         expected = (((1.8 * 5.48) + 1.58) - (30 * 0.041)) * 60
         self.assertAlmostEqual(ref_pef, expected, places=2)
@@ -93,7 +93,7 @@ class TestPefService(unittest.TestCase):
         self.pef_service._user = user
         self.mock_pef_repository.create = MagicMock()
 
-        ref_pef = self.pef_service.count_reference_pef(140, 10, 'male')
+        ref_pef = self.pef_service.count_reference_pef(140, 10, 'male').value
 
         expected = ((140 - 100) * 5) + 100
         self.assertEqual(ref_pef, expected)
@@ -136,15 +136,15 @@ class TestPefService(unittest.TestCase):
 
     def test_get_warning_message_morning_evening(self):
         msg = self.pef_service.get_warning_message(25, 10, 5)
-        self.assertIn("aamun ja illan välillä", msg)
+        self.assertIn("Aamun ja illan välinen PEF-erotus ylittää 20 % tai 60 L/min", msg)
 
     def test_get_warning_message_morning_before_after(self):
         msg = self.pef_service.get_warning_message(5, 18, 10)
-        self.assertIn("aamun ennen ja jälkeen", msg)
+        self.assertIn("Aamun ennen ja jälkeen lääkityksen välinen PEF-erotus ylittää 15 % tai 60 L/min!", msg)
 
     def test_get_warning_message_evening_before_after(self):
         msg = self.pef_service.get_warning_message(5, 10, 20)
-        self.assertIn("illan ennen ja jälkeen", msg)
+        self.assertIn("Illan ennen ja jälkeen lääkityksen välinen PEF-erotus ylittää 15 % tai 60 L/min!", msg)
 
     def test_get_warning_message_no_warning(self):
         msg = self.pef_service.get_warning_message(5, 5, 5)
@@ -213,15 +213,18 @@ class TestPefService(unittest.TestCase):
         # Test for values exceeding the thresholds
         msg = self.pef_service.get_warning_message(25, 16, 5)
         # Threshold exceeded for morning-evening
-        self.assertIn("aamun ja illan välillä", msg)
+        self.assertIn(
+            "Aamun ja illan välinen PEF-erotus ylittää 20 % tai 60 L/min\nAamun ennen ja jälkeen lääkityksen välinen PEF-erotus ylittää 15 % tai 60 L/min!",
+            msg
+        )
 
         msg = self.pef_service.get_warning_message(5, 18, 5)
         # Threshold exceeded for morning-before-after
-        self.assertIn("aamun ennen ja jälkeen", msg)
+        self.assertIn("Aamun ennen ja jälkeen lääkityksen välinen PEF-erotus ylittää 15 % tai 60 L/min!", msg)
 
         msg = self.pef_service.get_warning_message(5, 5, 20)
         # Threshold exceeded for evening-before-after
-        self.assertIn("illan ennen ja jälkeen", msg)
+        self.assertIn("Illan ennen ja jälkeen lääkityksen välinen PEF-erotus ylittää 15 % tai 60 L/min!", msg)
 
         msg = self.pef_service.get_warning_message(5, 5, 5)
         self.assertEqual(msg, "")  # No warning if no thresholds are exceeded
