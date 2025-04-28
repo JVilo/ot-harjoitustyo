@@ -10,7 +10,7 @@ sovelluksen avulla käyttäjä voi seurata omia pef-puhallus tuloksia verrattuna
 - [Työaikakirjanpito](./dokumentaatio/tuntikirjanpito.md)
 - [Changelog](./dokumentaatio/changelog.md)
 - [Arkkitehtuurikuvaus](./dokumentaatio/arkkitehtuuri.md)
-- [Release](https://github.com/JVilo/ot-harjoitustyo/releases/tag/Viikko5)
+- [Release](https://github.com/JVilo/ot-harjoitustyo/releases/tag/Viikko6)
 - [Käyttöohje](https://github.com/JVilo/ot-harjoitustyo/blob/main/dokumentaatio/kayttoohje.md)
 
 ## Asennus
