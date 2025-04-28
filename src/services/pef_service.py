@@ -87,7 +87,7 @@ class PefService:
             user = self._user
 
         if not user:
-            raise ValueError("User is not specified.")
+            raise ValueError("Käyttäjää ei ole.")
 
         height_in_m = height / 100
 
@@ -100,7 +100,7 @@ class PefService:
         elif age < 16:
             reference_pef_value = ((height - 100) * 5) + 100
         else:
-            raise ValueError("Invalid gender or age.")
+            raise ValueError("Täytä kaikki kentät ensin")
 
         ref_pef = Pef(value=reference_pef_value, user=user)
         self._pef_repository.create(ref_pef)
@@ -121,7 +121,8 @@ class PefService:
         """
         user = self._user_repository.find_by_username(username)
         if not user or user.password != password:
-            raise InvalidCredentialsError("Invalid username or password.")
+            raise InvalidCredentialsError(
+                "Virheellinen käyttäjätunnus tai salasana.")
         self._user = user
         return user
 
@@ -152,21 +153,31 @@ class PefService:
         Returns:
             Warning message or an empty string.
         """
+        warnings = []
+
         if morning_evening_diff is not None and (
-            morning_evening_diff > 20 or morning_evening_diff > 60
+                morning_evening_diff > 20 or morning_evening_diff > 60
         ):
-            return "The PEF difference between morning and evening exceeds 20% or 60 L/min!"
+            warnings.append("Aamun ja illan välinen "
+                            "PEF-erotus ylittää 20 % tai 60 L/min")
+
         if morning_before_after_diff is not None and (
-            morning_before_after_diff > 15 or morning_before_after_diff > 60
+                morning_before_after_diff > 15 or morning_before_after_diff > 60
         ):
-            return ("The PEF difference before and after "
-                    "medication in the morning exceeds 15% or 60 L/min!")
+            warnings.append(
+                "Aamun ennen ja jälkeen lääkityksen välinen "
+                "PEF-erotus ylittää 15 % tai 60 L/min!"
+            )
+
         if evening_before_after_diff is not None and (
-            evening_before_after_diff > 15 or evening_before_after_diff > 60
+                evening_before_after_diff > 15 or evening_before_after_diff > 60
         ):
-            return ("The PEF difference before and after "
-                    "medication in the evening exceeds 15% or 60 L/min!")
-        return ""
+            warnings.append(
+                "Illan ennen ja jälkeen lääkityksen välinen "
+                "PEF-erotus ylittää 15 % tai 60 L/min!"
+            )
+
+        return "\n".join(warnings)
 
     def calculate_pef_differences(
         self, morning_before, morning_after, evening_before, evening_after
@@ -406,17 +417,19 @@ class PefService:
 
         if over_20 >= needed_times and over_15 >= needed_times:
             warning_message = (
-                f'Pef variability exceeded diagnostic threshold {over_20} times!\n'
-                f'Bronchodilation response exceeded diagnostic threshold {over_15} times!'
+                f'PEF-vaihtelu ylitti diagnosointirajan'
+                f' {over_20} kertaa!'
+                f'Keuhkoputkia laajentava vaste ylitti diagnosointirajan'
+                f' {over_15} kertaa!'
             )
         elif over_20 >= needed_times:
-            warning_message = (f'Pef variability exceeded '
-                               f'diagnostic threshold {over_20} times!')
+            warning_message = (f'PEF-vaihtelu ylitti'
+                               f' diagnosointirajan {over_20} kertaa!')
         elif over_15 >= needed_times:
-            warning_message = (f'Bronchodilation response exceeded '
-                               f'diagnostic threshold {over_15} times!')
+            warning_message = (f'Keuhkoputkia laajentava vaste'
+                               f' ylitti diagnosointirajan {over_15} kertaa!')
         else:
-            warning_message = "No significant changes observed in PEF monitoring."
+            warning_message = "PEF-seurannassa ei havaittu merkittäviä muutoksia."
 
         return {
             "over_20": over_20,
@@ -458,10 +471,10 @@ class PefService:
         existing_user = self._user_repository.find_by_username(username)
         if existing_user:
             raise UsernameExistsError(
-                f"Username {username} is already in use.")
+                f"Käyttäjätunnus {username} on jo käytössä.")
 
         if password != password2:
-            raise PasswordsDoNotMatch('Passwords do not match.')
+            raise PasswordsDoNotMatch('Salasanat eivät täsmää.')
 
         user = self._user_repository.create(User(username, password))
 
