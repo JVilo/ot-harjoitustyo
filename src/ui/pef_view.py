@@ -351,18 +351,21 @@ class PefListView:
             # Check how many values are filled
             filled = [v for v in [mb, ma, eb, ea] if v is not None]
             if len(filled) < 2:
-                messagebox.showerror("Virhe", "Syötä vähintään kaksi arvoa vertailuun.")
+                messagebox.showerror(
+                    "Virhe", "Syötä vähintään kaksi arvoa vertailuun.")
                 return
 
             # Validate range only for filled fields
             for label, value in [("Aamu ennen", mb), ("Aamu jälkeen", ma),
                                  ("Ilta ennen", eb), ("Ilta jälkeen", ea)]:
                 if value is not None and not (10 <= value <= 999):
-                    messagebox.showerror("Virhe", f"{label} PEF-arvon tulee olla 10–999.")
+                    messagebox.showerror(
+                        "Virhe", f"{label} PEF-arvon tulee olla 10–999.")
                     return
 
             # Call your service with what we have
-            results = self._pef_service.calculate_pef_differences(mb, ma, eb, ea)
+            results = self._pef_service.calculate_pef_differences(
+                mb, ma, eb, ea)
             self._display_comparison_results(results)
 
         except Exception as e:
@@ -505,10 +508,8 @@ class PefListView:
                 raise ValueError
 
             date_str = str(date)  # Convert to string format 'YYYY-MM-DD'
-            print("🔍 Checking existing entries:")
             existing = self._pef_service.get_monitoring_by_username()
             for entry in existing:
-                print(dict(entry))
                 if (entry['username'] == username and
                         entry['date'] == date_str and
                         entry['state'] == state and

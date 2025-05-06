@@ -22,21 +22,18 @@ class UI:
 
     def handle_login(self):
         # Placeholder function for handling login (this is where the user successfully logs in)
-        print("Login handler called")
 
         # Once the user logs in successfully, show the PEF calculation view
         self._show_pef_view()
 
     def handle_logout(self):
         # Placeholder function to handle logging out
-        print("Logout handler called")
 
         # After logging out, show the login view again
         self._show_login_view()
 
     def handle_create_user(self):
         # Placeholder function for handling user creation (this is where user creation logic goes)
-        print("User creation handler called")
         # After user creation, you can switch to the login view or a success message
         self._show_login_view()
 
