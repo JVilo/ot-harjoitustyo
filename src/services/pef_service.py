@@ -14,7 +14,6 @@ from repositories.pef_monitorin_repository import (
     pef_monitoring_repository as default_pef_monitoring_repository
 )
 
-
 class InvalidCredentialsError(Exception):
     pass
 
@@ -475,6 +474,13 @@ class PefService:
 
         if password != password2:
             raise PasswordsDoNotMatch('Salasanat eivät täsmää.')
+
+        if len(username) < 3:
+            raise ValueError(
+                "Käyttäjätunnuksen tulee olla vähintään 3 merkkiä pitkä.")
+
+        if len(password) < 6:
+            raise ValueError("Salasanan tulee olla vähintään 6 merkkiä pitkä.")
 
         user = self._user_repository.create(User(username, password))
 
