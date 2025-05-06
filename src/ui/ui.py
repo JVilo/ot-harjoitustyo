@@ -97,6 +97,6 @@ class UI:
     def run(self):
         # Runs the application and initializes the Tkinter root window
         root = tk.Tk()  # Create the Tkinter root window
-        root.geometry("1200x700")  # Set the window size to 1200x700
+        root.geometry("1100x900")  # Set the window size to 1100x900
         self.start()  # Start the UI and show the login view
         root.mainloop()  # Start Tkinter's event loop to keep the window open
