@@ -6,9 +6,10 @@ Sovelluksen avulla käyttäjä voi seurata omia pef-tuloksia ja nähdä oman keu
 
 ## Käyttäjät
 
-Aluksi sovelluksessa tulee ainoastaan olemaan _tavallisia käyttäjiä_. &#10004; Myöhemmin ohjelmaan saatetaan lisätä _pääkäyttäjiä_, jotka voivat hallinnoida käyttäjiä ohjelmassa.
+Sovellusta käytetään ainoastaan _tavalliset käyttäjät_. &#10004; 
 
 ## Käyttöliittymäluonnos
+
 Sovelluksessa tulee olemaan kolme näkymää. &#10004;
 
 ![alt text](./kuvat/vaatimus.png)
@@ -19,7 +20,7 @@ Sovellus aukeaa kirjautumisnäkymään, josta voi mennä luomaan uuden käyttäj
 
 ### Ennen kirjautumista
 
-- Jos käyttäjätunnusta ei ole, voi käyttäjä luoda käyttäjätunnuksen.&#10004; Käyttäjätunnus ei voi olla jo järjestelmässä oleva tunnus ja sen tulee olla vähintään 3 merkkiä pitkä.
+- Jos käyttäjätunnusta ei ole, voi käyttäjä luoda käyttäjätunnuksen.&#10004; Käyttäjätunnus ei voi olla jo järjestelmässä oleva tunnus ja sen tulee olla vähintään 3 merkkiä pitkä.&#10004;
 - Käyttäjä voi kirjautua järjestelmään, jos tunnus on jo olemassa.&#10004;
 - Jos käyttäjätunnusta ei ole tai salasana on virheellinen kirjautuessa, järjestelmä ilmoittaa tästä.&#10004;
 

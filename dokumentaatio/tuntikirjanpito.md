@@ -48,4 +48,10 @@
 |       |  0.5  | Koodin refaktorointia.  |
 | 28.4. |   1   | Arkitehtuuri dokumentin päivittäminen. |
 |       |   3   | Lisää refaktorointia ja testien korjaamista. |
-|  yht  | 39.38 |  |
+| 29.4. |   1   | Salasanan ja käyttäjänimen pituuden varmistaminen. |
+|       |   1   | Päällekäin renderöityvien lomakkeiden käsittely niin että ei tapahtuisi. |
+| 5.5.  |   1   | Bugien korjaus. |
+| 6.5.  |   1   | Tietokannan alustamattomuteen  luotu virhe ilmoitus. |
+|       |  0.5  | Lint virheen korjaus. |
+|       |   1   | Testidokumentin luominen. |
+| yht   | 58.88 |  |
