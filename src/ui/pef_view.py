@@ -189,6 +189,7 @@ class PefListView:
             self._reference_section.grid_remove()
             self._pef_reference_button.config(text="Laske PEF-viitearvo")
         else:
+            self._hide_all_sections()
             self._reference_section.grid()
             self._initialize_fields()
             self._pef_reference_button.config(text="Sulje PEF-viitearvo")
@@ -296,6 +297,7 @@ class PefListView:
             self._comparison_frame.grid_remove()
             self._calculate_comparison_button.config(text="Laske vertailu")
         else:
+            self._hide_all_sections()
             self._comparison_frame.grid()
             self._initialize_comparison_fields()
             self._calculate_comparison_button.config(text="Sulje vertailu")
@@ -339,20 +341,28 @@ class PefListView:
 
     def _calculate_comparison(self):
         """Calculate PEF differences and update results."""
+        """Calculate PEF differences and update results."""
         try:
             mb = self._safe_float_conversion(self._morning_before_var.get())
             ma = self._safe_float_conversion(self._morning_after_var.get())
             eb = self._safe_float_conversion(self._evening_before_var.get())
             ea = self._safe_float_conversion(self._evening_after_var.get())
 
-            for value in [mb, ma, eb, ea]:
-                if value is None or not (10 <= value <= 999):
-                    messagebox.showerror(
-                        "Virhe", "PEF-arvojen tulee olla 10–999.")
+            # Check how many values are filled
+            filled = [v for v in [mb, ma, eb, ea] if v is not None]
+            if len(filled) < 2:
+                messagebox.showerror("Virhe", "Syötä vähintään kaksi arvoa vertailuun.")
+                return
+
+            # Validate range only for filled fields
+            for label, value in [("Aamu ennen", mb), ("Aamu jälkeen", ma),
+                                 ("Ilta ennen", eb), ("Ilta jälkeen", ea)]:
+                if value is not None and not (10 <= value <= 999):
+                    messagebox.showerror("Virhe", f"{label} PEF-arvon tulee olla 10–999.")
                     return
 
-            results = self._pef_service.calculate_pef_differences(
-                mb, ma, eb, ea)
+            # Call your service with what we have
+            results = self._pef_service.calculate_pef_differences(mb, ma, eb, ea)
             self._display_comparison_results(results)
 
         except Exception as e:
@@ -367,10 +377,13 @@ class PefListView:
 
     def _display_comparison_results(self, results):
         """Format and display comparison results."""
+        def fmt(value):
+            return f"{value:.2f}%" if value is not None else "–"
+
         text = (
-            f"Aamun-illan ero: {results.get('morning_evening_diff', 'N/A'):.2f}%\n"
-            f"Aamun ero ennen-jälkeen: {results.get('before_after_diff_morning', 'N/A'):.2f}%\n"
-            f"Illan ero ennen-jälkeen: {results.get('before_after_diff_evening', 'N/A'):.2f}%\n"
+            f"Aamun-illan ero: {fmt(results.get('morning_evening_diff'))}\n"
+            f"Aamun ero ennen-jälkeen: {fmt(results.get('before_after_diff_morning'))}\n"
+            f"Illan ero ennen-jälkeen: {fmt(results.get('before_after_diff_evening'))}\n"
             f"Varoitus: {results.get('warning_message', 'Ei varoitusta')}"
         )
         self._comparison_result_var.set(text)
@@ -381,6 +394,7 @@ class PefListView:
             self._pef_frame.grid_forget()
             self._toggle_button.config(text="Pef-seuranta")
         else:
+            self._hide_all_sections()
             if not hasattr(self, '_pef_monitoring_section_created'):
                 self._create_pef_monitoring_section()
                 self._pef_monitoring_section_created = True
@@ -489,6 +503,25 @@ class PefListView:
             val1, val2, val3 = int(value1), int(value2), int(value3)
             if not (10 <= val1 <= 999 and 10 <= val2 <= 999 and 10 <= val3 <= 999):
                 raise ValueError
+
+            date_str = str(date)  # Convert to string format 'YYYY-MM-DD'
+            print("🔍 Checking existing entries:")
+            existing = self._pef_service.get_monitoring_by_username()
+            for entry in existing:
+                print(dict(entry))
+                if (entry['username'] == username and
+                        entry['date'] == date_str and
+                        entry['state'] == state and
+                        entry['time'] == time):
+                    messagebox.showerror(
+                        "Virhe", "Tälle päivälle on jo tehty seuranta näillä parametreillä.")
+                    return False
+
+            if abs(val2 - val1) > 20 or abs(val3 - val2) > 20:
+                messagebox.showerror(
+                    "Virhe", "Kahden peräkkäisen PEF-arvon ero ei saa ylittää 20 yksikköä.")
+                return False
+
         except ValueError:
             messagebox.showerror(
                 "Virhe", "PEF-arvojen tulee olla numeroita välillä 10–999.")
@@ -733,3 +766,13 @@ class PefListView:
         tk.Label(popup, text=instructions_text.strip(),
                  justify="left", padx=10, pady=10).pack(padx=10, pady=10)
         ttk.Button(popup, text="Sulje", command=popup.destroy).pack(pady=10)
+
+    def _hide_all_sections(self):
+        self._reference_section.grid_remove()
+        self._comparison_frame.grid_remove()
+        self._pef_frame.grid_remove()
+
+        # Reset button labels
+        self._pef_reference_button.config(text="Laske PEF-viitearvo")
+        self._calculate_comparison_button.config(text="Laske vertailu")
+        self._toggle_button.config(text="Pef-seuranta")
