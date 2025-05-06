@@ -15,3 +15,6 @@ class Pef:
         self.value = value
         self.user = user
         self.pef_id = pef_id or str(uuid.uuid4())
+
+    def __format__(self, format_spec):
+        return format(self.value, format_spec)
