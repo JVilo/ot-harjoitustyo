@@ -12,6 +12,7 @@ sovelluksen avulla käyttäjä voi seurata omia pef-puhallus tuloksia verrattuna
 - [Arkkitehtuurikuvaus](./dokumentaatio/arkkitehtuuri.md)
 - [Release](https://github.com/JVilo/ot-harjoitustyo/releases/tag/loppupalautus)
 - [Käyttöohje](https://github.com/JVilo/ot-harjoitustyo/blob/main/dokumentaatio/kayttoohje.md)
+- [Testausdokumentti](https://github.com/JVilo/ot-harjoitustyo/blob/loppupalautus/dokumentaatio/testaus.md)
 
 ## Asennus
 
