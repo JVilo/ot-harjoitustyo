@@ -2,6 +2,15 @@
 
 Lataa projektin viimeisimmän [releasen](...) lähdekoodi valitsemalla _Assets_-osion alta _Source code_.
 
+## Konfigurointi
+
+Tallennuksessa käytettävien tiedostojen nimet voidaan määrittää .env-tiedostossa, joka sijaitsee käynnistyshakemistossa. Jos tiedostot eivät vielä ole data-hakemistossa, ne luodaan automaattisesti. Tiedoston muoto on seuraava:
+
+```
+PEF_FILENAME=pef.csv
+DATABASE_FILENAME=database.sqlite
+```
+
 ## Ohjelman käynnistäminen
 
 Ennen ohjelman käyttöönottamista, asenna tarvittavat riippuvuudet seuraavalla komennolla:
