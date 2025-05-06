@@ -1,6 +1,6 @@
 # Käyttöohje
 
-Lataa projektin viimeisimmän [releasen](...) lähdekoodi valitsemalla _Assets_-osion alta _Source code_.
+Lataa projektin viimeisimmän [releasen](https://github.com/JVilo/ot-harjoitustyo/releases/tag/loppupalautus) lähdekoodi valitsemalla _Assets_-osion alta _Source code_.
 
 ## Konfigurointi
 
