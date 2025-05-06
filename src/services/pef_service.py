@@ -341,10 +341,15 @@ class PefService:
         # Calculate highest, lowest, and average PEF
         highest, lowest, average = self._calculate_pef_stats(all_pef_values)
 
-        return self._build_monitoring_summary(
-            thresholds["over_20"], thresholds["over_15"], monitored_days_count,
-            highest, lowest, average
-        )
+        summary_data = {
+            "over_20": thresholds["over_20"],
+            "over_15": thresholds["over_15"],
+            "monitored_days_count": monitored_days_count,
+            "highest": highest,
+            "lowest": lowest,
+            "average": average
+        }
+        return self._build_monitoring_summary(summary_data)
 
     def _process_day_thresholds(self, vals, thresholds):
         """Processes PEF data for one day and updates thresholds."""
@@ -409,25 +414,27 @@ class PefService:
         """Returns the maximum of the three PEF values."""
         return max(values["value1"], values["value2"], values["value3"])
 
-    def _build_monitoring_summary(
-        self, over_20, over_15, monitored_days_count, highest, lowest, average
-    ):
+    def _build_monitoring_summary(self, data):
         """Builds a summary message and status report."""
-        needed_times = max(1, monitored_days_count // 2)
+        over_20 = data.get("over_20")
+        over_15 = data.get("over_15")
+        monitored_days_count = data.get("monitored_days_count")
+        highest = data.get("highest")
+        lowest = data.get("lowest")
+        average = data.get("average")
+
+        needed_times = max(1, monitored_days_count // 2 if monitored_days_count else 1)
 
         if over_20 >= needed_times and over_15 >= needed_times:
             warning_message = (
-                f'PEF-vaihtelu ylitti diagnosointirajan'
-                f' {over_20} kertaa!'
-                f'Keuhkoputkia laajentava vaste ylitti diagnosointirajan'
-                f' {over_15} kertaa!'
+                f'PEF-vaihtelu ylitti diagnosointirajan {over_20} kertaa! '
+                f'Keuhkoputkia laajentava vaste ylitti diagnosointirajan {over_15} kertaa!'
             )
         elif over_20 >= needed_times:
-            warning_message = (f'PEF-vaihtelu ylitti'
-                               f' diagnosointirajan {over_20} kertaa!')
+            warning_message = f'PEF-vaihtelu ylitti diagnosointirajan {over_20} kertaa!'
         elif over_15 >= needed_times:
-            warning_message = (f'Keuhkoputkia laajentava vaste'
-                               f' ylitti diagnosointirajan {over_15} kertaa!')
+            warning_message = (f'Keuhkoputkia laajentava vaste '
+                               f'ylitti diagnosointirajan {over_15} kertaa!')
         else:
             warning_message = "PEF-seurannassa ei havaittu merkittäviä muutoksia."
 
