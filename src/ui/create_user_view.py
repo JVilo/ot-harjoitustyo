@@ -1,4 +1,6 @@
 from tkinter import ttk, StringVar, constants
+import sqlite3
+from tkinter import messagebox
 from services.pef_service import pef_service, UsernameExistsError, PasswordsDoNotMatch
 
 
@@ -44,6 +46,14 @@ class CreateUserView:
             self._show_error("Passwords do not match")
             return
 
+        if len(username) < 3:
+            self._show_error("Username must be at least 3 characters long")
+            return
+
+        if len(password) < 6:
+            self._show_error("Password must be at least 6 characters long")
+            return
+
         try:
             # Attempts to create a new user via the pef_service
             # Pass only the username and password
@@ -57,6 +67,18 @@ class CreateUserView:
         except PasswordsDoNotMatch:
             # If the passwords do not match (this is more of a safeguard in case the validation failed before)
             self._show_error("Passwords do not match")
+
+        except ValueError as e:
+            self._show_error(str(e))
+
+        except sqlite3.OperationalError as e:
+            if "no such table" in str(e):
+                messagebox.showerror(
+                    "Tietokantavirhe",
+                    "Tietokantaa ei ole alustettu. Suorita 'poetry run invoke build' ennen sovelluksen käynnistämistä."
+                )
+            else:
+                raise
 
     def _show_error(self, message):
         # Displays an error message in the error label
@@ -129,7 +151,7 @@ class CreateUserView:
         # Create the "Login" button to switch to the login view
         login_button = ttk.Button(
             master=self._frame,
-            text="Login",
+            text="Back to Login",
             # Calls the function to show the login view
             command=self._handle_show_login_view,
             width=20

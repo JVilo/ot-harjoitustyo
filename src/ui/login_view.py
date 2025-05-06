@@ -1,4 +1,6 @@
 from tkinter import ttk, StringVar, constants
+import sqlite3
+from tkinter import messagebox
 from services.pef_service import pef_service, InvalidCredentialsError
 
 
@@ -35,6 +37,15 @@ class LoginView:
             pef_service._user = user
         except InvalidCredentialsError:
             self._show_error("Invalid username or password")
+
+        except sqlite3.OperationalError as e:
+            if "no such table" in str(e):
+                messagebox.showerror(
+                    "Tietokantavirhe",
+                    "Tietokantaa ei ole alustettu. Suorita 'poetry run invoke build' ennen sovelluksen käynnistämistä."
+                )
+            else:
+                raise
 
     def _show_error(self, message):
         self._error_variable.set(message)
